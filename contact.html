@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Contact — Baunilha dos Açores</title>
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon.png">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="assets/styles.css">
+  <script defer src="assets/script.js"></script>
+  <script>
+  (function(){
+    function qAll(s){return Array.from(document.querySelectorAll(s));}
+    function apply(map){ qAll('[data-i18n]').forEach(el=>{const k=el.getAttribute('data-i18n'); if(map && map[k]) try{ el.innerText = map[k]; }catch(e){} }); qAll('.lang-switch button').forEach(b=>b.classList.toggle('active', b.getAttribute('data-lang')===window.__site_lang)); }
+    fetch('assets/translations.json').then(r=>r.json()).then(trans=>{ window.__TRANSLATIONS = trans; window.__site_lang = localStorage.getItem('site_lang') || 'en'; apply(window.__TRANSLATIONS[window.__site_lang] || window.__TRANSLATIONS.en); qAll('.lang-switch button').forEach(b=> b.addEventListener('click', ()=>{ window.__site_lang = b.getAttribute('data-lang'); localStorage.setItem('site_lang', window.__site_lang); apply(window.__TRANSLATIONS[window.__site_lang] || window.__TRANSLATIONS.en); })); }).catch(e=>console.warn('translations.json load failed',e));
+  })();
+  </script>
+</head>
+<body>
+  <header class="nav">
+    <button class="menu-toggle" aria-label="Menu">☰</button>
+    <div class="logo" data-i18n="logo">Baunilha dos Açores</div>
+    <nav>
+      <a class="btn" href="index.html" data-i18n="nav_home">Home</a>
+      <a class="btn" href="about.html" data-i18n="nav_about">Who We Are</a>
+      <a class="btn" href="visits.html" data-i18n="nav_visits">Visits</a>
+      <a class="btn" href="investments.html" data-i18n="nav_invest">Investments</a>
+      <a class="btn" href="statistics.html" data-i18n="nav_stats">Statistics</a>
+      <a class="btn" href="contact.html" data-i18n="nav_contact">Contact</a>
+      <span class="lang-switch">
+        <button data-lang="en">EN</button>
+        <button data-lang="pt">PT</button>
+      </span>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <h1 data-i18n="contact_title">Contact Us</h1>
+      <p data-i18n="contact_intro">We welcome inquiries about visits, purchases, and partnerships. Reach us by email, phone or social networks.</p>
+
+      <p><strong data-i18n="contact_email_label">Email:</strong>
+        <img src="assets/email.png" alt="azoreanvanilla@gmail.com" style="vertical-align:text-top;margin-left:8px;margin-top:-8px;height:28px">
+      </p>
+      <p><strong data-i18n="contact_phone_label">Phone:</strong>
+        <img src="assets/phone.png" alt="+351 926 802 312" style="vertical-align:text-top;margin-left:8px;margin-top:-8px;height:28px">
+      </p>
+    </section>
+
+    <section class="card">
+      <h2 data-i18n="contact_address_title">Location</h2>
+      <p data-i18n="contact_address_label">Ribeira Grande (Conceição), São Miguel, Azores</p>
+
+      <div class="map-wrap">
+        <iframe
+          title="Map — Baunilha dos Açores"
+          src="https://www.google.com/maps?q=Ribeira+Grande+Conceicao+Sao+Miguel+Azores&output=embed"
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade">
+        </iframe>
+      </div>
+
+      <p class="muted" data-i18n="contact_map_note">Map uses Google Maps embed — replace with your preferred provider or a static image if needed.</p>
+    </section>
+
+    <section class="card">
+      <h2 data-i18n="follow_us_title">Follow Us</h2>
+      <div class="social-links">
+        <a href="https://instagram.com/azoreanvanilla" target="_blank" rel="noopener noreferrer" title="Instagram" aria-label="Instagram"><i class="fab fa-instagram"></i> Instagram</a>
+        <a href="https://facebook.com/azoreanvanilla" target="_blank" rel="noopener noreferrer" title="Facebook" aria-label="Facebook"><i class="fab fa-facebook"></i> Facebook</a>
+        <a href="https://wa.me/" title="WhatsApp" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+        <a href="https://x.com/azoreanvanilla" target="_blank" rel="noopener noreferrer" title="X" aria-label="X"><i class="fab fa-twitter"></i> X</a>
+        <a href="https://youtube.com/@azoreanvanilla" target="_blank" rel="noopener noreferrer" title="YouTube" aria-label="YouTube"><i class="fab fa-youtube"></i> YouTube</a>
+        <a href="https://t.me/azoreanvanilla" target="_blank" rel="noopener noreferrer" title="Telegram" aria-label="Telegram"><i class="fab fa-telegram"></i> Telegram</a>
+      </div>
+    </section>
+  </main>
+  <footer class="footer">
+    <div class="container">
+      <p data-i18n="footer_copy">&copy; Baunilha dos Açores — São Miguel</p>
+      <div class="social-links">
+        <a href="https://instagram.com/azoreanvanilla" target="_blank" rel="noopener noreferrer" title="Instagram" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+        <a href="https://facebook.com/azoreanvanilla" target="_blank" rel="noopener noreferrer" title="Facebook" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+        <a href="contact.html#whatsapp" title="WhatsApp" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+        <a href="https://x.com/azoreanvanilla" target="_blank" rel="noopener noreferrer" title="X" aria-label="X"><i class="fab fa-twitter"></i></a>
+        <a href="https://youtube.com/@azoreanvanilla" target="_blank" rel="noopener noreferrer" title="YouTube" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+        <a href="https://t.me/azoreanvanilla" target="_blank" rel="noopener noreferrer" title="Telegram" aria-label="Telegram"><i class="fab fa-telegram"></i></a>
+      </div>
+      <p><a href="terms.html">Terms &amp; Conditions</a></p>
+    </div>
+  </footer>
+</body>
+</html>

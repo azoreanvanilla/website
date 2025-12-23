@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Vanilla Project — São Miguel, Azores</title>
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon.png">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="assets/styles.css">
+  <script defer src="assets/script.js"></script>
+  <script>
+  (function(){
+    function qAll(s){return Array.from(document.querySelectorAll(s));}
+    function apply(map){
+      qAll('[data-i18n]').forEach(el=>{const k=el.getAttribute('data-i18n'); if(map && map[k]) try{ el.innerText = map[k]; }catch(e){}
+      });
+      qAll('.lang-switch button').forEach(b=>b.classList.toggle('active', b.getAttribute('data-lang')===window.__site_lang));
+    }
+    fetch('assets/translations.json').then(r=>r.json()).then(trans=>{
+      window.__TRANSLATIONS = trans;
+      window.__site_lang = localStorage.getItem('site_lang') || 'en';
+      apply(window.__TRANSLATIONS[window.__site_lang] || window.__TRANSLATIONS.en);
+      qAll('.lang-switch button').forEach(b=> b.addEventListener('click', ()=>{ window.__site_lang = b.getAttribute('data-lang'); localStorage.setItem('site_lang', window.__site_lang); apply(window.__TRANSLATIONS[window.__site_lang] || window.__TRANSLATIONS.en); }));
+    }).catch(e=>console.warn('translations.json load failed',e));
+  });
+  </script>
+  </script>
+  <meta name="description" content="Vanilla cultivation project on São Miguel Island (Azores). Visits, investment, statistics.">
+</head>
+<body class="home">
+  <header class="nav">
+    <button class="menu-toggle" aria-label="Menu">☰</button>
+    <div class="logo" data-i18n="logo">Baunilha dos Açores</div>
+    <nav>
+      <a class="btn" href="index.html" data-i18n="nav_home">Home</a>
+      <a class="btn" href="about.html" data-i18n="nav_about">Who We Are</a>
+      <a class="btn" href="visits.html" data-i18n="nav_visits">Visits</a>
+      <a class="btn" href="investments.html" data-i18n="nav_invest">Investments</a>
+      <a class="btn" href="statistics.html" data-i18n="nav_stats">Statistics</a>
+      <a class="btn" href="contact.html" data-i18n="nav_contact">Contact</a>
+      <span class="lang-switch">
+        <button data-lang="en">EN</button>
+        <button data-lang="pt">PT</button>
+      </span>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" id="hero">
+      <div class="hero-inner">
+        <h1 data-i18n="hero_title">Vanilla Project — São Miguel</h1>
+        <p class="lead" data-i18n="hero_lead">Experimentally cultivating uncommon vanilla in greenhouse conditions on São Miguel island.</p>
+        <p class="cta-row">
+          <a class="cta primary" href="investments.html" data-i18n="cta_support">Support the Project</a>
+          <a class="cta secondary" href="visits.html" data-i18n="cta_visit">Plan a Visit</a>
+        </p>
+      </div>
+      <div class="hero-overlay"></div>
+    </section>
+
+    <section class="container card">
+      <h2 data-i18n="project_title">Project</h2>
+      <p data-i18n="project_desc">This project explores whether vanilla can thrive in greenhouse conditions on São Miguel Island. We combine small-scale R&amp;D, sustainable off-grid methods, and agrotourism to build a unique product and visitor experience.</p>
+      <p>Browse <a href="about.html" data-i18n="nav_about">Who We Are</a>, our <a href="statistics.html" data-i18n="nav_stats">Statistics</a> or learn how to <a href="investments.html" data-i18n="nav_invest">Support</a> us.</p>
+    </section>
+
+    <section class="container gallery card">
+      <h2 data-i18n="gallery_title">Gallery</h2>
+      <div class="grid">
+        <img src="assets/greenhouse1.jpg" alt="Greenhouse interior 1" class="media gallery-image" data-index="0">
+        <img src="assets/greenhouse2.jpg" alt="Greenhouse interior 2" class="media gallery-image" data-index="1">
+        <img src="assets/greenhouse3.jpg" alt="Greenhouse interior 3" class="media gallery-image" data-index="2">
+      </div>
+    </section>
+
+    <!-- LIGHTBOX MODAL -->
+    <div id="lightbox" class="lightbox hidden">
+      <span class="lightbox-close">&times;</span>
+      <img class="lightbox-image" src="" alt="">
+      <div class="lightbox-nav">
+        <button class="lightbox-prev" aria-label="Previous image">❮</button>
+        <button class="lightbox-next" aria-label="Next image">❯</button>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <div class="container">
+        <p data-i18n="footer_copy">&copy; Vanilla Project — São Miguel, Azores</p>
+        <div class="social-links">
+          <a href="https://instagram.com/azoreanvanilla" target="_blank" rel="noopener noreferrer" title="Instagram" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+          <a href="https://facebook.com/azoreanvanilla" target="_blank" rel="noopener noreferrer" title="Facebook" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+          <a href="contact.html" title="WhatsApp" aria-label="WhatsApp" data-i18n="see_contacts"><i class="fab fa-whatsapp"></i></a>
+          <a href="https://x.com/azoreanvanilla" target="_blank" rel="noopener noreferrer" title="X" aria-label="X"><i class="fab fa-twitter"></i></a>
+          <a href="https://youtube.com/@azoreanvanilla" target="_blank" rel="noopener noreferrer" title="YouTube" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+          <a href="https://t.me/azoreanvanilla" target="_blank" rel="noopener noreferrer" title="Telegram" aria-label="Telegram"><i class="fab fa-telegram"></i></a>
+        </div>
+        <p><a href="terms.html">Terms &amp; Conditions</a></p>
+      </div>
+    </footer>
+  </main>
+</body>
+</html>

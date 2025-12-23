@@ -1,0 +1,56 @@
+# Operating System
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+.AppleDouble
+.LSOverride
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+*~
+.sublime-project
+.sublime-workspace
+
+# Build & Dist
+/dist
+/build
+*.min.js
+*.min.css
+.cache/
+
+# Node modules (if added later)
+node_modules/
+npm-debug.log
+package-lock.json
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Backup files
+*.bak
+*.backup
+*.tmp
+*.temp
+
+# OS-specific
+.vscode/settings.json
+.vscode/extensions.json
+
+# Never commit
+credentials.json
+secrets.json
+config.local.js
+
+# Generated files
+*.map
+.coverage/
