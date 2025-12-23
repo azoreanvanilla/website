@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Terms and Conditions</title>
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon.png">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="assets/styles.css">
+  <script defer src="assets/script.js"></script>
+  <script>
+  (function(){
+    function qAll(s){return Array.from(document.querySelectorAll(s));}
+    function apply(map){ qAll('[data-i18n]').forEach(el=>{const k=el.getAttribute('data-i18n'); if(map && map[k]) try{ el.innerText = map[k]; }catch(e){} }); qAll('.lang-switch button').forEach(b=>b.classList.toggle('active', b.getAttribute('data-lang')===window.__site_lang)); }
+    fetch('assets/translations.json').then(r=>r.json()).then(trans=>{ window.__TRANSLATIONS = trans; window.__site_lang = localStorage.getItem('site_lang') || 'en'; apply(window.__TRANSLATIONS[window.__site_lang] || window.__TRANSLATIONS.en); qAll('.lang-switch button').forEach(b=> b.addEventListener('click', ()=>{ window.__site_lang = b.getAttribute('data-lang'); localStorage.setItem('site_lang', window.__site_lang); apply(window.__TRANSLATIONS[window.__site_lang] || window.__TRANSLATIONS.en); })); }).catch(e=>console.warn('translations.json load failed',e));
+  })();
+  </script>
+</head>
+<body>
+  <header class="nav">
+    <button class="menu-toggle" aria-label="Menu">☰</button>
+    <div class="logo" data-i18n="logo">Baunilha dos Açores</div>
+    <nav>
+      <a class="btn" href="index.html" data-i18n="nav_home">Home</a>
+      <a class="btn" href="about.html" data-i18n="nav_about">Who We Are</a>
+      <a class="btn" href="visits.html" data-i18n="nav_visits">Visits</a>
+      <a class="btn" href="investments.html" data-i18n="nav_invest">Investments</a>
+      <a class="btn" href="statistics.html" data-i18n="nav_stats">Statistics</a>
+      <a class="btn" href="contact.html" data-i18n="nav_contact">Contact</a>
+      <span class="lang-switch">
+        <button data-lang="en">EN</button>
+        <button data-lang="pt">PT</button>
+      </span>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <h1 data-i18n="terms_title">Terms and Conditions</h1>
+    </section>
+
+    <section class="card">
+      <p data-i18n="terms_intro">Terms and Conditions</p>
+      <p data-i18n="terms_updated">Last updated: [insert date]</p>
+      <p><strong data-i18n="terms_1_title">1. General Provisions</strong></p>
+      <p data-i18n="terms_1_1">1.1. These Terms and Conditions (hereinafter – the "Terms") govern access to and use of the website [insert domain name] (hereinafter – the "Website").</p>
+      <p data-i18n="terms_1_2">1.2. Website owner: [insert name / legal entity / individual], contact details: [e‑mail / phone / postal address].</p>
+      <p data-i18n="terms_1_3">1.3. By using the Website, you confirm that you have read, understood and agree to be bound by these Terms. If you do not agree with the Terms, please do not use the Website.</p>
+    </section>
+
+    <section class="card">
+      <p><strong data-i18n="terms_2_title">2. Nature of the Website and Provided Content</strong></p>
+      <p data-i18n="terms_2_1">2.1. The Website is informational in nature and provides:</p>
+      <p data-i18n="terms_2_1_a">— static content about the activities of the Website owner;</p>
+      <p data-i18n="terms_2_1_b">— unique statistics on temperature and humidity indicators in greenhouses used for growing a plant that is unique for the Azores region;</p>
+      <p data-i18n="terms_2_1_c">— contact details of the Website owner;</p>
+      <p data-i18n="terms_2_1_d">— payment details for voluntary donations.</p>
+      <p data-i18n="terms_2_2">2.2. The information on the Website is provided "as is", without any warranties regarding its accuracy, completeness, timeliness, or fitness for any particular purpose.</p>
+      <p data-i18n="terms_2_3">2.3. The Website is not:</p>
+      <p data-i18n="terms_2_3_a">— an online store or payment processing service;</p>
+      <p data-i18n="terms_2_3_b">— a platform for user registration;</p>
+      <p data-i18n="terms_2_3_c">— a source of professional advice (agricultural, legal, financial, medical, or any other).</p>
+    </section>
+
+    <section class="card">
+      <p><strong data-i18n="terms_3_title">3. No Registration and No Processing of Personal Data</strong></p>
+      <p data-i18n="terms_3_1">3.1. The Website contains no input fields, registration forms, or user login forms.</p>
+      <p data-i18n="terms_3_2">3.2. We do not collect, process, or store users' personal data through the Website.</p>
+      <p data-i18n="terms_3_3">3.3. We do not track user statistics and do not use web analytics tools (such as Google Analytics, etc.) to track the behavior of individual users.</p>
+      <p data-i18n="terms_3_note">Note: if you later add analytics tools or contact forms, this section must be updated.</p>
+    </section>
+
+    <section class="card">
+      <p><strong data-i18n="terms_4_title">4. Donations and Payment Details</strong></p>
+      <p data-i18n="terms_4_1">4.1. The Website may display details for voluntary donations, such as bank details, payment systems, cryptocurrency wallets, and similar.</p>
+      <p data-i18n="terms_4_2">4.2. The Website does not itself accept or process payments. All transfers are carried out via third‑party payment services or banks at your own discretion.</p>
+      <p data-i18n="terms_4_3">4.3. By making a donation, you confirm that:</p>
+      <p data-i18n="terms_4_3_a">— you are doing so voluntarily;</p>
+      <p data-i18n="terms_4_3_b">— you understand that this is a donation, not a payment for goods or services;</p>
+      <p data-i18n="terms_4_3_c">— you do not expect any mandatory material or service benefit in return for your donation.</p>
+      <p data-i18n="terms_4_4">4.4. We are not responsible for the operation of third‑party payment services, any fees, delays, or errors in payment processing.</p>
+    </section>
+
+    <section class="card">
+      <p><strong data-i18n="terms_5_title">5. Use of Information and Disclaimer</strong></p>
+      <p data-i18n="terms_5_1">5.1. All information regarding temperature, humidity, and other parameters in the greenhouses is provided for informational purposes only.</p>
+      <p data-i18n="terms_5_2">5.2. We make reasonable efforts to ensure that the data is correct; however, we do not guarantee its accuracy, completeness, or relevance.</p>
+      <p data-i18n="terms_5_3">5.3. The Website owner shall not be liable for:</p>
+      <p data-i18n="terms_5_3_a">— any decisions you make based on the information on the Website (for example, when planning agricultural activities, growing plants, making investments, etc.);</p>
+      <p data-i18n="terms_5_3_b">— any direct or indirect losses, damage, loss of profit, data, or opportunities arising from the use of or inability to use the information on the Website.</p>
+      <p data-i18n="terms_5_4">5.4. You use the Website at your own risk and are solely responsible for assessing whether the information provided is suitable for your purposes.</p>
+    </section>
+
+    <section class="card">
+      <p><strong data-i18n="terms_6_title">6. Intellectual Property and Content</strong></p>
+      <p data-i18n="terms_6_1">6.1. All materials on the Website (texts, graphics, diagrams, tables, data visualizations, etc.), unless explicitly indicated as belonging to third parties, are:</p>
+      <p data-i18n="terms_6_1_a">— the property of the Website owner; and/or</p>
+      <p data-i18n="terms_6_1_b">— content generated using artificial intelligence (AI) systems, the rights to use which belong to the Website owner.</p>
+      <p data-i18n="terms_6_2">6.2. Unless a separate written permission is granted, users are not allowed to:</p>
+      <p data-i18n="terms_6_2_a">— copy, reproduce, distribute, modify, publish, transmit, or otherwise use the Website content for commercial purposes;</p>
+      <p data-i18n="terms_6_2_b">— present the Website content as their own.</p>
+      <p data-i18n="terms_6_3">6.3. Non‑commercial use of the Website materials (for example, quoting in research, presentations, educational materials) is permitted under the following conditions:</p>
+      <p data-i18n="terms_6_3_a">— an active link to the Website as the source is provided;</p>
+      <p data-i18n="terms_6_3_b">— the author/owner of the Website is correctly cited, where indicated.</p>
+      <p data-i18n="terms_6_4">6.4. In case of infringement of intellectual property rights, the Website owner is entitled to take measures provided by the applicable law.</p>
+    </section>
+
+    <section class="card">
+      <p><strong data-i18n="terms_7_title">7. Links to Third‑Party Resources</strong></p>
+      <p data-i18n="terms_7_1">7.1. The Website may contain links to third‑party websites, services, and resources (for example, payment systems, information resources).</p>
+      <p data-i18n="terms_7_2">7.2. We do not control and are not responsible for the content, privacy policies, terms of use, or security of such third‑party resources.</p>
+      <p data-i18n="terms_7_3">7.3. By following any links, you act at your own risk and must independently review the relevant terms and policies of those websites.</p>
+    </section>
+
+    <section class="card">
+      <p><strong data-i18n="terms_8_title">8. Limitation of Liability</strong></p>
+      <p data-i18n="terms_8_1">8.1. To the maximum extent permitted by law, the Website owner, its representatives, and partners shall not be liable for:</p>
+      <p data-i18n="terms_8_1_a">— any direct, indirect, incidental, consequential, or punitive damages arising from or in connection with the use of the Website;</p>
+      <p data-i18n="terms_8_1_b">— failures, errors, interruptions in the operation of the Website, technical issues, viruses, or other harmful components.</p>
+      <p data-i18n="terms_8_2">8.2. The Website is provided on an "as is" and "as available" basis without any express or implied warranties.</p>
+    </section>
+
+    <section class="card">
+      <p><strong data-i18n="terms_9_title">9. Contacting the Website Owner</strong></p>
+      <p data-i18n="terms_9_1">9.1. For any questions related to the Website content, donations, use of materials, or potential infringements, you can contact us at:</p>
+      <p data-i18n="terms_9_1_contact">[insert e‑mail / contact form / other contact method].</p>
+      <p data-i18n="terms_9_2">9.2. When contacting us, you voluntarily provide your contact details (such as e‑mail address / phone number) for the purpose of responding to your inquiry. These data are used solely for communication with you and are not published on the Website.</p>
+    </section>
+
+    <section class="card">
+      <p><strong data-i18n="terms_10_title">10. Changes to the Terms</strong></p>
+      <p data-i18n="terms_10_1">10.1. We reserve the right to modify or supplement these Terms at any time.</p>
+      <p data-i18n="terms_10_2">10.2. The updated version of the Terms will be published on the Website with the date of the last update.</p>
+      <p data-i18n="terms_10_3">10.3. By continuing to use the Website after changes are made, you agree to the updated Terms.</p>
+    </section>
+
+    <section class="card">
+      <p><strong data-i18n="terms_11_title">11. Governing Law and Dispute Resolution</strong></p>
+      <p data-i18n="terms_11_1">11.1. These Terms and any issues related to the use of the Website shall be governed by the laws of [insert country / jurisdiction, e.g. Portugal / EU / other].</p>
+      <p data-i18n="terms_11_2">11.2. Any disputes, controversies, or claims arising out of or in connection with the use of the Website shall be subject to the jurisdiction of the competent courts at the place of registration of the Website owner, unless otherwise required by mandatory provisions of applicable law.</p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p data-i18n="footer_copy">&copy; Baunilha dos Açores — São Miguel</p>
+      <div class="social-links">
+        <a href="https://instagram.com/azoreanvanilla" target="_blank" rel="noopener noreferrer" title="Instagram" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+        <a href="https://facebook.com/azoreanvanilla" target="_blank" rel="noopener noreferrer" title="Facebook" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+        <a href="contact.html" title="WhatsApp" aria-label="WhatsApp" data-i18n="see_contacts"><i class="fab fa-whatsapp"></i></a>
+        <a href="https://x.com/azoreanvanilla" target="_blank" rel="noopener noreferrer" title="X" aria-label="X"><i class="fab fa-twitter"></i></a>
+        <a href="https://youtube.com/@azoreanvanilla" target="_blank" rel="noopener noreferrer" title="YouTube" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+        <a href="https://t.me/azoreanvanilla" target="_blank" rel="noopener noreferrer" title="Telegram" aria-label="Telegram"><i class="fab fa-telegram"></i></a>
+      </div>
+      <p><a href="terms.html">Terms &amp; Conditions</a></p>
+    </div>
+  </footer>
+</body>
+</html>
