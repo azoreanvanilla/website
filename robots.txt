@@ -1,0 +1,12 @@
+# Allow search engines to crawl all pages
+User-agent: *
+Allow: /
+Disallow: /.git
+Disallow: /.github
+Disallow: /node_modules
+
+# Specify sitemap location
+Sitemap: https://azoreanvanilla.com/sitemap.xml
+
+# Crawl delay (in seconds)
+Crawl-delay: 1
