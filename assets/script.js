@@ -205,7 +205,7 @@ const TRANSLATIONS = {
     // Statistics
     dashboard_title: 'Research Dashboard', dashboard_subtitle: 'Greenhouse Monitoring & Performance Data', dashboard_intro_why: 'At Baunilha dos Açores, we believe in open science. The data below represents our research on greenhouse conditions for vanilla cultivation in the Azores. This isn\'t just a display; it\'s an invitation to understand our methods.', dashboard_intro_for_researchers: 'For Researchers: Validate our methods. Contribute insights. See how precision climate control enables vanilla cultivation in a temperate climate.', dashboard_intro_for_investors: 'For Investors: Transparency builds trust. Watch our data patterns. Observe how we engineer a microclimate where vanilla orchids thrive—the foundation of our AgTech scalability.', dashboard_intro_for_enthusiasts: 'For Enthusiasts: Witness the delicate dance of environmental control. This is what mastering vanilla\'s \'comfort zone\' looks like in practice.', dashboard_intro_iot: 'Our greenhouse is equipped with environmental sensors. The data below illustrates the conditions we maintain to keep vanilla thriving in the Azores.',
     live_conditions_title: 'Target Greenhouse Conditions', metric_temperature: 'Temperature', metric_humidity: 'Humidity', metric_vpd: 'VPD', status_optimal: 'Optimal', status_ideal: 'Ideal', temp_range: '18–24°C', hum_range: '65–75%', vpd_range: '0.4–0.6 kPa',
-    plant_status_title: 'Plant Status Indicators', status_growth_phase: 'Optimal Growth Phase', status_transpiration: 'Active Transpiration', status_monitoring: 'Monitoring for Fungi Risk', status_explanation: 'The greenhouse is in an optimal growth window. Current conditions support active nutrient absorption and plant development. VPD is ideal for stomatal function.', status_updated: 'Based on Research: December 2025',
+    plant_status_title: 'Plant Status Indicators', status_growth_phase: 'Optimal Growth Phase', status_transpiration: 'Active Transpiration', status_monitoring: 'Monitoring for Fungi Risk', status_explanation: 'The greenhouse is in an optimal growth window. Current conditions support active nutrient absorption and plant development. VPD is ideal for stomatal function.',
     comparison_title: 'Inside vs. Outside: The Azorean Advantage', comparison_intro: 'The comparison below illustrates why our greenhouse design is a breakthrough for vanilla cultivation in the Azores. Outside, the island\'s temperate climate is beautiful but insufficient for vanilla. Inside, we engineer the tropics.', comp_temperature: 'Temperature', comp_humidity: 'Humidity', comp_vpd: 'VPD', comparison_conclusion: 'Why This Matters: Our greenhouse creates a microclimate that vanilla orchids crave—precision weather engineering. This data validates our competitive edge: we use the Azores\' renewable energy abundance to power climate control that transforms a temperate island into a vanilla paradise.',
     trend_title: '24-Hour Trend: The Daily Rhythm', trend_intro: 'This chart shows the natural oscillations we orchestrate. Notice how temperature dips overnight (we heat to prevent shock) and peaks midday (we ventilate to maintain the ideal range). Humidity follows the inverse: higher when it\'s cooler, managed carefully during warm hours. VPD is our true north—we adjust temperature and humidity in concert to keep VPD in the sweet spot.', chart_note: '[Interactive chart coming soon — showing Temperature (blue), Humidity (green), VPD (orange) over 24 hours]', trend_rhythm: 'This rhythm mirrors the natural day-night cycle that vanilla expects, even though we\'re controlling every variable. That\'s the essence of our technology.',
     metrics_title: 'What the Numbers Mean: Vanilla Orchid Science', card_temp_title: 'Temperature', card_temp_range: '18–24°C (64–75°F)', card_temp_why_title: 'Why It Matters for Vanilla', card_temp_why: 'Vanilla orchids are children of the tropics. They need consistent warmth to trigger growth and flowering. Temperatures below 18°C stall development; above 32°C, the plant enters stress. Our 24.5°C sweet spot accelerates both vegetative growth and the delicate process of flower maturation.', card_temp_growth_title: 'Growth Signal You\'re Watching', card_temp_growth: 'When temperature is stable in the 24–28°C range, vanilla\'s metabolic engines run at peak efficiency. The plant allocates energy to developing the inflorescence (flower spike)—the precursor to our precious vanilla beans.', card_temp_control_title: 'What We Control', card_temp_control_heating: 'Overnight heating (prevents stress from island cool-downs)', card_temp_control_ventilation: 'Daytime ventilation (prevents overheating in summer)', card_temp_control_seasonal: 'Seasonal adjustments (respects flowering cycles)',
@@ -257,7 +257,7 @@ const TRANSLATIONS = {
     // Statistics
     dashboard_title: 'Painel de Pesquisa', dashboard_subtitle: 'Monitorização do Comportamento da Estufa e Dados de Desempenho', dashboard_intro_why: 'Em Baunilha dos Açores, acreditamos na ciência aberta. Os dados abaixo representam a nossa pesquisa sobre condições de estufa para o cultivo de baunilha nos Açores. Isto não é apenas uma exibição; é um convite para compreender os nossos métodos.', dashboard_intro_for_researchers: 'Para Pesquisadores: Validem os nossos métodos. Contribuam com insights. Vejam como o controle climático de precisão permite o cultivo de baunilha num clima temperado.', dashboard_intro_for_investors: 'Para Investidores: A transparência constrói confiança. Acompanhem os nossos padrões de dados. Observem como engenhamos um microclima onde as orquídeas de baunilha prosperam—a base da nossa escalabilidade de AgTech.', dashboard_intro_for_enthusiasts: 'Para Entusiastas: Testemunhem a dança delicada do controle ambiental. É assim que se parece dominar a \'zona de conforto\' da baunilha na prática.', dashboard_intro_iot: 'A nossa estufa está equipada com sensores ambientais. Os dados abaixo ilustram as condições que mantemos para a baunilha prosperar nos Açores.',
     live_conditions_title: 'Condições-Alvo da Estufa', metric_temperature: 'Temperatura', metric_humidity: 'Humidade', metric_vpd: 'VPD', status_optimal: 'Ótimo', status_ideal: 'Ideal', temp_range: '18–24°C', hum_range: '65–75%', vpd_range: '0,4–0,6 kPa',
-    plant_status_title: 'Indicadores de Estado da Planta', status_growth_phase: 'Fase de Crescimento Ótima', status_transpiration: 'Transpiração Ativa', status_monitoring: 'Monitorização de Risco de Fungos', status_explanation: 'A estufa está numa janela de crescimento ótima. As condições atuais apoiam a absorção ativa de nutrientes e o desenvolvimento da planta. O VPD é ideal para a função estomatal.', status_updated: 'Com Base em Pesquisa: Dezembro de 2025',
+    plant_status_title: 'Indicadores de Estado da Planta', status_growth_phase: 'Fase de Crescimento Ótima', status_transpiration: 'Transpiração Ativa', status_monitoring: 'Monitorização de Risco de Fungos', status_explanation: 'A estufa está numa janela de crescimento ótima. As condições atuais apoiam a absorção ativa de nutrientes e o desenvolvimento da planta. O VPD é ideal para a função estomatal.',
     comparison_title: 'Interior vs. Exterior: A Vantagem Açoriana', comparison_intro: 'A comparação abaixo ilustra por que a nossa conceção de estufa é uma inovação para o cultivo de baunilha nos Açores. No exterior, o clima temperado da ilha é bonito mas insuficiente para a baunilha. No interior, engenhamos os trópicos.', comp_temperature: 'Temperatura', comp_humidity: 'Humidade', comp_vpd: 'VPD', comparison_conclusion: 'Por que isto é Importante: A nossa estufa cria um microclima que as orquídeas de baunilha desejam—engenharia meteorológica de precisão. Estes dados validam a nossa vantagem competitiva: utilizamos a abundância de energia renovável dos Açores para alimentar o controle climático que transforma uma ilha temperada num paraíso de baunilha.',
     trend_title: 'Tendência de 24 Horas: O Ritmo Diário', trend_intro: 'Este gráfico mostra as oscilações naturais que orquestamos. Reparem como a temperatura desce durante a noite (aquecemos para evitar choque) e atinge o pico ao meio-dia (ventilamos para manter o intervalo ideal). A humidade segue o inverso: mais alta quando está mais frio, controlada cuidadosamente durante as horas quentes. O VPD é a nossa bússola verdadeira—ajustamos a temperatura e a humidade em conjunto para manter o VPD no ponto ideal.', chart_note: '[Gráfico interativo em breve — mostrando Temperatura (azul), Humidade (verde), VPD (laranja) em 24 horas]', trend_rhythm: 'Este ritmo espelha o ciclo dia-noite natural que a baunilha espera, mesmo que estejamos a controlar cada variável. Esta é a essência da nossa tecnologia.',
     metrics_title: 'O Que os Números Significam: Ciência das Orquídeas de Baunilha', card_temp_title: 'Temperatura', card_temp_range: '18–24°C (64–75°F)', card_temp_why_title: 'Por que é Importante para a Baunilha', card_temp_why: 'As orquídeas de baunilha são filhas dos trópicos. Precisam de calor consistente para desencadear o crescimento e a floração. Temperaturas abaixo de 18°C atrasam o desenvolvimento; acima de 32°C, a planta entra em estresse. O nosso ponto ideal de 24,5°C acelera tanto o crescimento vegetativo quanto o processo delicado de maturação da flor.', card_temp_growth_title: 'Sinal de Crescimento que Estão a Observar', card_temp_growth: 'Quando a temperatura é estável na faixa de 24–28°C, os motores metabólicos da baunilha funcionam com eficiência máxima. A planta aloca energia para desenvolver a inflorescência (espiga de flor)—o precursor das nossas preciosas vagens de baunilha.', card_temp_control_title: 'O que Controlamos', card_temp_control_heating: 'Aquecimento noturno (evita estresse do resfriamento noturno dos Açores)', card_temp_control_ventilation: 'Ventilação diurna (evita superaquecimento no verão)', card_temp_control_seasonal: 'Ajustes sazonais (respeita ciclos de floração)',
@@ -315,6 +315,7 @@ function translatePage(lang){
   });
   // no debug logs in production
   qAll('.lang-switch button').forEach(b => b.classList.toggle('active', b.getAttribute('data-lang') === lang));
+  window.__site_lang = lang;
   localStorage.setItem('site_lang', lang);
 }
 
@@ -934,6 +935,27 @@ function applyFilter(){
   }
 }
 
+// Update date dynamically in status_updated elements
+function updateDynamicDates() {
+  const now = new Date();
+  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const monthNamesPortuguese = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+  
+  const currentMonth = monthNames[now.getMonth()];
+  const currentMonthPT = monthNamesPortuguese[now.getMonth()];
+  const currentYear = now.getFullYear();
+  
+  // Update all status_updated elements
+  qAll('.status-updated small[data-i18n="status_updated"]').forEach(el => {
+    const lang = window.__site_lang || 'en';
+    if (lang === 'pt') {
+      el.textContent = `Com Base em Pesquisa: ${currentMonthPT} de ${currentYear}`;
+    } else {
+      el.textContent = `Based on Research: ${currentMonth} ${currentYear}`;
+    }
+  });
+}
+
 /* ----------------------------- initialization ----------------------------- */
 document.addEventListener('DOMContentLoaded', () => {
   setupParallax();
@@ -947,11 +969,13 @@ document.addEventListener('DOMContentLoaded', () => {
       // small retries to cover edge cases
       setTimeout(()=> translatePage(lang), 80);
       setTimeout(()=> translatePage(lang), 240);
+      updateDynamicDates();
     });
   });
 
   const saved = localStorage.getItem('site_lang') || 'en';
   translatePage(saved);
+  updateDynamicDates();
 
   // apply saved hero height if present (clamp to sensible range)
   const savedHero = localStorage.getItem('hero_height');
