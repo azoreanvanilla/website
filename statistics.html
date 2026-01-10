@@ -207,6 +207,10 @@
               <stop offset="0%" style="stop-color:#cce5ff;stop-opacity:0.3" />
               <stop offset="100%" style="stop-color:#ffffff;stop-opacity:0" />
             </linearGradient>
+            <!-- Clip polylines to chart boundaries to prevent stroke overflow -->
+            <clipPath id="temp-chart-clip">
+              <rect x="50" y="20" width="820" height="180"/>
+            </clipPath>
           </defs>
           
           <!-- Y-AXIS LABELS (14-32°C) -->
@@ -242,7 +246,9 @@
           
           <!-- TEMPERATURE LINE -->
           <polyline points="50,145 70,120 90,105 110,95 130,88 150,95 170,120 190,155 210,185 230,195 250,190 270,165 290,145 310,125 330,110 350,100 370,108 390,135 410,175 430,200 450,205 470,175 490,145 510,125 530,110 550,115 570,145 590,175 610,195 630,200 650,175 670,145 690,125 710,115 730,120 750,150 770,180 790,195 810,200 830,190 850,165 870,145" 
-                    fill="none" stroke="#0066cc" stroke-width="3" stroke-linejoin="round"/>
+                    fill="none" stroke="#0066cc" stroke-width="3" stroke-linejoin="round" clip-path="url(#temp-chart-clip)"/>
+          <!-- Right edge mask to prevent stroke overflow -->
+          <rect x="865" y="15" width="40" height="190" fill="white" opacity="0.95"/>
         </svg>
       </div>
 
@@ -255,6 +261,10 @@
               <stop offset="0%" style="stop-color:#ccf0dd;stop-opacity:0.3" />
               <stop offset="100%" style="stop-color:#ffffff;stop-opacity:0" />
             </linearGradient>
+            <!-- Clip polylines to chart boundaries to prevent stroke overflow -->
+            <clipPath id="hum-chart-clip">
+              <rect x="50" y="20" width="820" height="180"/>
+            </clipPath>
           </defs>
           
           <!-- Y-AXIS LABELS (50-95%) -->
@@ -290,7 +300,9 @@
           
           <!-- HUMIDITY LINE (inverse of temperature) -->
           <polyline points="50,80 70,100 90,125 110,145 130,160 150,140 170,105 190,65 210,35 230,25 250,30 270,60 290,80 310,105 330,125 350,140 370,135 390,110 410,55 430,30 450,25 470,55 490,85 510,110 530,130 550,125 570,100 590,65 610,35 630,25 650,55 670,85 690,110 710,130 730,120 750,95 770,60 790,40 810,30 830,40 850,70 870,100" 
-                    fill="none" stroke="#27ae60" stroke-width="3" stroke-linejoin="round"/>
+                    fill="none" stroke="#27ae60" stroke-width="3" stroke-linejoin="round" clip-path="url(#hum-chart-clip)"/>
+          <!-- Right edge mask to prevent stroke overflow -->
+          <rect x="865" y="15" width="40" height="190" fill="white" opacity="0.95"/>
         </svg>
       </div>
 
@@ -303,6 +315,10 @@
               <stop offset="0%" style="stop-color:#ffe8cc;stop-opacity:0.3" />
               <stop offset="100%" style="stop-color:#ffffff;stop-opacity:0" />
             </linearGradient>
+            <!-- Clip polylines to chart boundaries to prevent stroke overflow -->
+            <clipPath id="vpd-chart-clip">
+              <rect x="50" y="20" width="820" height="180"/>
+            </clipPath>
           </defs>
           
           <!-- Y-AXIS LABELS (0-2.5 kPa) -->
@@ -339,7 +355,9 @@
           
           <!-- VPD LINE -->
           <polyline points="50,130 70,110 90,95 110,80 130,70 150,85 170,120 190,165 210,195 230,205 250,200 270,165 290,130 310,105 330,85 350,70 370,80 390,115 410,180 430,210 450,215 470,180 490,135 510,105 530,85 550,90 570,130 590,170 610,200 630,210 650,175 670,130 690,105 710,85 730,90 750,130 770,170 790,200 810,210 830,195 850,160 870,130" 
-                    fill="none" stroke="#f39c12" stroke-width="3" stroke-linejoin="round"/>
+                    fill="none" stroke="#f39c12" stroke-width="3" stroke-linejoin="round" clip-path="url(#vpd-chart-clip)"/>
+          <!-- Right edge mask to prevent stroke overflow -->
+          <rect x="865" y="15" width="40" height="190" fill="white" opacity="0.95"/>
         </svg>
       </div>
 
