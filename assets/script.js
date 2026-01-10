@@ -725,14 +725,26 @@ function updateChartTimeLabels(chartData) {
   console.log(`📊 Chart time range: ${firstDate.toLocaleTimeString()} to ${lastDate.toLocaleTimeString()}`);
   console.log(`📊 Time span: ${timeSpanHours.toFixed(1)} hours, ${chartData.length} data points`);
   
-  // Generate 6 time labels based on actual time range
+  // Generate time labels - first and last are fixed to actual data bounds
   const timeLabels = [];
   const xPositions = [50, 170, 290, 410, 530, 650, 770];
   
   for(let i = 0; i < xPositions.length; i++) {
-    const fraction = i / (xPositions.length - 1); // 0 to 1
-    const timeMs = firstDate.getTime() + (lastDate.getTime() - firstDate.getTime()) * fraction;
-    const labelDate = new Date(timeMs);
+    let labelDate;
+    
+    if(i === 0) {
+      // First label is always the first timestamp
+      labelDate = firstDate;
+    } else if(i === xPositions.length - 1) {
+      // Last label is always the last timestamp
+      labelDate = lastDate;
+    } else {
+      // Middle labels are interpolated
+      const fraction = i / (xPositions.length - 1);
+      const timeMs = firstDate.getTime() + (lastDate.getTime() - firstDate.getTime()) * fraction;
+      labelDate = new Date(timeMs);
+    }
+    
     const hours = String(labelDate.getHours()).padStart(2, '0');
     const minutes = String(labelDate.getMinutes()).padStart(2, '0');
     timeLabels.push({
@@ -752,7 +764,7 @@ function updateChartTimeLabels(chartData) {
     });
   });
   
-  console.log(`🕐 Time labels: ${timeLabels[0].time} → ${timeLabels[timeLabels.length-1].time}`);
+  console.log(`🕐 Time labels: ${timeLabels[0].time} (start) → ${timeLabels[timeLabels.length-1].time} (end, actual last)`);
 }
 
 function updateCharts(chartData){
