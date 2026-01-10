@@ -95,7 +95,7 @@
             <span id="live-vpd">1.2</span><span class="unit">kPa</span>
           </div>
           <div class="gauge-status" id="gauge-vpd-status">Ideal</div>
-          <div class="gauge-range">0.4–0.6 kPa</div>
+          <div class="gauge-range" id="vpd-target-range"></div>
         </div>
       </div>
     </section>
@@ -223,22 +223,22 @@
           <line x1="50" y1="20" x2="50" y2="200" stroke="#999" stroke-width="1.5"/>
           <line x1="50" y1="200" x2="870" y2="200" stroke="#999" stroke-width="1.5"/>
           
-          <!-- X-AXIS TIME LABELS -->
+          <!-- X-AXIS TIME LABELS (evenly spaced at 136.67px intervals) -->
           <text x="50" y="220" font-size="10" fill="#666" text-anchor="middle">00:00</text>
-          <text x="170" y="220" font-size="10" fill="#666" text-anchor="middle">04:00</text>
-          <text x="290" y="220" font-size="10" fill="#666" text-anchor="middle">08:00</text>
-          <text x="410" y="220" font-size="10" fill="#666" text-anchor="middle">12:00</text>
-          <text x="530" y="220" font-size="10" fill="#666" text-anchor="middle">16:00</text>
-          <text x="650" y="220" font-size="10" fill="#666" text-anchor="middle">20:00</text>
-          <text x="770" y="220" font-size="10" fill="#666" text-anchor="middle">24:00</text>
+          <text x="186.67" y="220" font-size="10" fill="#666" text-anchor="middle">04:00</text>
+          <text x="323.33" y="220" font-size="10" fill="#666" text-anchor="middle">08:00</text>
+          <text x="460" y="220" font-size="10" fill="#666" text-anchor="middle">12:00</text>
+          <text x="596.67" y="220" font-size="10" fill="#666" text-anchor="middle">16:00</text>
+          <text x="733.33" y="220" font-size="10" fill="#666" text-anchor="middle">20:00</text>
+          <text x="870" y="220" font-size="10" fill="#666" text-anchor="middle">24:00</text>
           
-          <!-- VERTICAL GRID LINES -->
-          <line x1="170" y1="20" x2="170" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
-          <line x1="290" y1="20" x2="290" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
-          <line x1="410" y1="20" x2="410" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
-          <line x1="530" y1="20" x2="530" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
-          <line x1="650" y1="20" x2="650" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
-          <line x1="770" y1="20" x2="770" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
+          <!-- VERTICAL GRID LINES (matching label positions) -->
+          <line x1="186.67" y1="20" x2="186.67" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
+          <line x1="323.33" y1="20" x2="323.33" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
+          <line x1="460" y1="20" x2="460" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
+          <line x1="596.67" y1="20" x2="596.67" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
+          <line x1="733.33" y1="20" x2="733.33" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
+          <line x1="870" y1="20" x2="870" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
           
           <!-- OPTIMAL RANGE SHADING (policy-based) -->
           <rect x="50" y="45" width="820" height="105" fill="url(#temp-grad)" opacity="0.5"/>
@@ -275,22 +275,22 @@
           <line x1="50" y1="20" x2="50" y2="200" stroke="#999" stroke-width="1.5"/>
           <line x1="50" y1="200" x2="870" y2="200" stroke="#999" stroke-width="1.5"/>
           
-          <!-- X-AXIS TIME LABELS -->
+          <!-- X-AXIS TIME LABELS (evenly spaced at 136.67px intervals) -->
           <text x="50" y="220" font-size="10" fill="#666" text-anchor="middle">00:00</text>
-          <text x="170" y="220" font-size="10" fill="#666" text-anchor="middle">04:00</text>
-          <text x="290" y="220" font-size="10" fill="#666" text-anchor="middle">08:00</text>
-          <text x="410" y="220" font-size="10" fill="#666" text-anchor="middle">12:00</text>
-          <text x="530" y="220" font-size="10" fill="#666" text-anchor="middle">16:00</text>
-          <text x="650" y="220" font-size="10" fill="#666" text-anchor="middle">20:00</text>
-          <text x="770" y="220" font-size="10" fill="#666" text-anchor="middle">24:00</text>
+          <text x="186.67" y="220" font-size="10" fill="#666" text-anchor="middle">04:00</text>
+          <text x="323.33" y="220" font-size="10" fill="#666" text-anchor="middle">08:00</text>
+          <text x="460" y="220" font-size="10" fill="#666" text-anchor="middle">12:00</text>
+          <text x="596.67" y="220" font-size="10" fill="#666" text-anchor="middle">16:00</text>
+          <text x="733.33" y="220" font-size="10" fill="#666" text-anchor="middle">20:00</text>
+          <text x="870" y="220" font-size="10" fill="#666" text-anchor="middle">24:00</text>
           
-          <!-- VERTICAL GRID LINES -->
-          <line x1="170" y1="20" x2="170" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
-          <line x1="290" y1="20" x2="290" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
-          <line x1="410" y1="20" x2="410" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
-          <line x1="530" y1="20" x2="530" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
-          <line x1="650" y1="20" x2="650" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
-          <line x1="770" y1="20" x2="770" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
+          <!-- VERTICAL GRID LINES (matching label positions) -->
+          <line x1="186.67" y1="20" x2="186.67" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
+          <line x1="323.33" y1="20" x2="323.33" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
+          <line x1="460" y1="20" x2="460" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
+          <line x1="596.67" y1="20" x2="596.67" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
+          <line x1="733.33" y1="20" x2="733.33" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
+          <line x1="870" y1="20" x2="870" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
           
           <!-- OPTIMAL RANGE SHADING (policy-based) -->
           <rect x="50" y="55" width="820" height="85" fill="url(#hum-grad)" opacity="0.5"/>
@@ -317,37 +317,37 @@
             </clipPath>
           </defs>
           
-          <!-- Y-AXIS LABELS (0-2.5 kPa) -->
-          <text x="45" y="30" font-size="11" fill="#666" text-anchor="end">2.5 kPa</text>
-          <text x="45" y="80" font-size="11" fill="#666" text-anchor="end">1.875 kPa</text>
-          <text x="45" y="130" font-size="11" fill="#666" text-anchor="end">1.25 kPa</text>
-          <text x="45" y="180" font-size="11" fill="#666" text-anchor="end">0.625 kPa</text>
-          <text x="45" y="210" font-size="11" fill="#666" text-anchor="end">0 kPa</text>
+          <!-- Y-AXIS LABELS (0-2.5 kPa, evenly spaced within y=20-200) -->
+          <text x="45" y="25" font-size="11" fill="#666" text-anchor="end">2.5 kPa</text>
+          <text x="45" y="70" font-size="11" fill="#666" text-anchor="end">1.875 kPa</text>
+          <text x="45" y="115" font-size="11" fill="#666" text-anchor="end">1.25 kPa</text>
+          <text x="45" y="160" font-size="11" fill="#666" text-anchor="end">0.625 kPa</text>
+          <text x="45" y="205" font-size="11" fill="#666" text-anchor="end">0 kPa</text>
           
           <!-- AXES -->
           <line x1="50" y1="20" x2="50" y2="200" stroke="#999" stroke-width="1.5"/>
           <line x1="50" y1="200" x2="870" y2="200" stroke="#999" stroke-width="1.5"/>
           
-          <!-- X-AXIS TIME LABELS -->
+          <!-- X-AXIS TIME LABELS (evenly spaced at 136.67px intervals) -->
           <text x="50" y="220" font-size="10" fill="#666" text-anchor="middle">00:00</text>
-          <text x="170" y="220" font-size="10" fill="#666" text-anchor="middle">04:00</text>
-          <text x="290" y="220" font-size="10" fill="#666" text-anchor="middle">08:00</text>
-          <text x="410" y="220" font-size="10" fill="#666" text-anchor="middle">12:00</text>
-          <text x="530" y="220" font-size="10" fill="#666" text-anchor="middle">16:00</text>
-          <text x="650" y="220" font-size="10" fill="#666" text-anchor="middle">20:00</text>
-          <text x="770" y="220" font-size="10" fill="#666" text-anchor="middle">24:00</text>
+          <text x="186.67" y="220" font-size="10" fill="#666" text-anchor="middle">04:00</text>
+          <text x="323.33" y="220" font-size="10" fill="#666" text-anchor="middle">08:00</text>
+          <text x="460" y="220" font-size="10" fill="#666" text-anchor="middle">12:00</text>
+          <text x="596.67" y="220" font-size="10" fill="#666" text-anchor="middle">16:00</text>
+          <text x="733.33" y="220" font-size="10" fill="#666" text-anchor="middle">20:00</text>
+          <text x="870" y="220" font-size="10" fill="#666" text-anchor="middle">24:00</text>
           
-          <!-- VERTICAL GRID LINES -->
-          <line x1="170" y1="20" x2="170" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
-          <line x1="290" y1="20" x2="290" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
-          <line x1="410" y1="20" x2="410" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
-          <line x1="530" y1="20" x2="530" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
-          <line x1="650" y1="20" x2="650" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
-          <line x1="770" y1="20" x2="770" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
+          <!-- VERTICAL GRID LINES (matching label positions) -->
+          <line x1="186.67" y1="20" x2="186.67" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
+          <line x1="323.33" y1="20" x2="323.33" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
+          <line x1="460" y1="20" x2="460" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
+          <line x1="596.67" y1="20" x2="596.67" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
+          <line x1="733.33" y1="20" x2="733.33" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
+          <line x1="870" y1="20" x2="870" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
           
           <!-- OPTIMAL RANGE SHADING (policy-based) -->
           <rect x="50" y="80" width="820" height="56" fill="url(#vpd-grad)" opacity="0.5"/>
-          <text x="55" y="110" font-size="9" fill="#f39c12" opacity="0.5" font-weight="600" id="chart-vpd-label">Ideal: 0.40–0.60 kPa</text>
+          <text x="55" y="110" font-size="9" fill="#f39c12" opacity="0.5" font-weight="600" id="chart-vpd-label"></text>
           
           <!-- VPD LINE -->
           <polyline id="vpd-line" points="" 
@@ -415,7 +415,7 @@
         <!-- VPD CARD -->
         <div class="metric-card">
           <h3 data-i18n="card_vpd_title">VPD (Vapor Pressure Deficit)</h3>
-          <div class="metric-value" id="card-vpd-range">0.4–0.6 kPa (Kilopascals)</div>
+          <div class="metric-value" id="card-vpd-range"></div>
           <div class="metric-current">
             <small data-i18n="current_label">Current:</small> <span id="card-vpd">--</span> kPa
           </div>
@@ -427,9 +427,9 @@
           <p data-i18n="card_vpd_matters">VPD directly controls how aggressively a plant transpires (releases water through leaves and aerial roots).</p>
           
           <ul>
-            <li id="card-vpd-too-low">VPD too low (< 0.6 kPa): The air is so humid that the plant can't release water. Roots suffocate. Fungi thrive.</li>
+            <li id="card-vpd-too-low">VPD too low: The air is so humid that the plant can't release water. Roots suffocate. Fungi thrive.</li>
             <li id="card-vpd-too-high">VPD too high (> 2.0 kPa): The air is so dry that the plant desperately transpires to cool itself. The plant loses water faster than roots can absorb it—inducing drought stress.</li>
-            <li id="card-vpd-sweet">VPD in the sweet spot (0.4–0.6 kPa): The plant transpires at the perfect rate. Nutrients move through the plant efficiently. Growth is maximized. The plant is neither drowning nor gasping.</li>
+            <li id="card-vpd-sweet">VPD in the sweet spot: The plant transpires at the perfect rate. Nutrients move through the plant efficiently. Growth is maximized. The plant is neither drowning nor gasping.</li>
           </ul>
           
           <h4 data-i18n="card_vpd_growth_title">Growth Signal You're Watching</h4>
