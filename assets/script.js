@@ -809,35 +809,64 @@ function updateOutdoorGaugeStatus(temp, humidity, vpd){
   }
 }
 
-function updateOutdoorPlantStatus(temp, humidity, vpd){
-  // Update outdoor plant status display
-  const display = q('#outdoor-status-display');
+function updateOutdoorAssessmentStatus(temp, humidity, vpd){
+  // Update outdoor assessment with status items comparing to current policy
+  const display = q('#outdoor-assess-display');
   if(!display) return;
+  
+  const { name, policy } = getCurrentPolicy();
+  const vpdTol = getVpdTolerance(policy);
   
   let html = '';
   
   // Assess temperature
-  if(temp < 18) {
-    html += '<div class="status-item status-critical"><span class="status-icon">🔴</span><span class="status-text">Too Cold (' + temp.toFixed(1) + '°C) for Vanilla</span></div>';
-  } else if(temp < 20) {
-    html += '<div class="status-item status-warning"><span class="status-icon">🟡</span><span class="status-text">Cold Stress (' + temp.toFixed(1) + '°C)</span></div>';
-  } else if(temp > 32) {
-    html += '<div class="status-item status-critical"><span class="status-icon">🔴</span><span class="status-text">Too Hot (' + temp.toFixed(1) + '°C)</span></div>';
+  const tempInRange = temp >= policy.t_min && temp <= policy.t_max;
+  if(tempInRange) {
+    html += '<div class="status-item status-good"><span class="status-icon">🟢</span><span class="status-text">Temperature Optimal (' + temp.toFixed(1) + '°C)</span></div>';
+  } else {
+    const distance = Math.min(Math.abs(temp - policy.t_min), Math.abs(temp - policy.t_max));
+    const isWarning = distance < 2;
+    if(isWarning) {
+      html += '<div class="status-item status-warning"><span class="status-icon">🟡</span><span class="status-text">Temperature Caution (' + temp.toFixed(1) + '°C)</span></div>';
+    } else {
+      html += '<div class="status-item status-critical"><span class="status-icon">🔴</span><span class="status-text">Temperature Critical (' + temp.toFixed(1) + '°C)</span></div>';
+    }
+  }
+  
+  // Assess humidity
+  const humInRange = humidity >= policy.h_min && humidity <= policy.h_max;
+  if(humInRange) {
+    html += '<div class="status-item status-good"><span class="status-icon">🟢</span><span class="status-text">Humidity Optimal (' + humidity.toFixed(0) + '%)</span></div>';
+  } else {
+    const distance = Math.min(Math.abs(humidity - policy.h_min), Math.abs(humidity - policy.h_max));
+    const isWarning = distance < 5;
+    if(isWarning) {
+      html += '<div class="status-item status-warning"><span class="status-icon">🟡</span><span class="status-text">Humidity Caution (' + humidity.toFixed(0) + '%)</span></div>';
+    } else {
+      html += '<div class="status-item status-critical"><span class="status-icon">🔴</span><span class="status-text">Humidity Critical (' + humidity.toFixed(0) + '%)</span></div>';
+    }
   }
   
   // Assess VPD
-  if(vpd > 2.0) {
-    html += '<div class="status-item status-critical"><span class="status-icon">🔴</span><span class="status-text">Extreme VPD Stress (' + vpd.toFixed(2) + ' kPa)</span></div>';
-  } else if(vpd > 1.5) {
-    html += '<div class="status-item status-warning"><span class="status-icon">🟡</span><span class="status-text">High VPD (' + vpd.toFixed(2) + ' kPa)</span></div>';
-  }
-  
-  // Assess overall viability
-  if(temp < 18 || vpd > 2.0) {
-    html += '<div class="status-item status-critical"><span class="status-icon">🔴</span><span class="status-text">Outdoor Growth Not Viable</span></div>';
+  const vpdInRange = vpd >= (policy.dv - vpdTol) && vpd <= (policy.dv + vpdTol);
+  if(vpdInRange) {
+    html += '<div class="status-item status-good"><span class="status-icon">🟢</span><span class="status-text">VPD Ideal (' + vpd.toFixed(2) + ' kPa)</span></div>';
+  } else {
+    const distance = Math.abs(vpd - policy.dv);
+    const isWarning = distance < vpdTol * 1.5;
+    if(isWarning) {
+      html += '<div class="status-item status-warning"><span class="status-icon">🟡</span><span class="status-text">VPD Caution (' + vpd.toFixed(2) + ' kPa)</span></div>';
+    } else {
+      html += '<div class="status-item status-critical"><span class="status-icon">🔴</span><span class="status-text">VPD Critical (' + vpd.toFixed(2) + ' kPa)</span></div>';
+    }
   }
   
   display.innerHTML = html;
+}
+
+function updateOutdoorPlantStatus(temp, humidity, vpd){
+  // Legacy function - now calls the assessment status update
+  updateOutdoorAssessmentStatus(temp, humidity, vpd);
 }
 
 function updateComparisonTableOutdoor(temp, humidity, vpd){
