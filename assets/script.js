@@ -470,6 +470,7 @@ async function loadStats(){
       
       // Update charts with last 24 rows from greenhouse
       const chartData = generateChartData(greenhouse);
+      updateChartTimeLabels(chartData);
       updateCharts(chartData);
     }
     
@@ -708,17 +709,75 @@ function generateChartData(dataRows){
   }));
 }
 
+function updateChartTimeLabels(chartData) {
+  if(!chartData || chartData.length < 1) return;
+  
+  // Update X-axis time labels to reflect actual data time span
+  const charts = qAll('svg.metric-chart');
+  if(charts.length < 3) return;
+  
+  const firstDate = parseDate(chartData[0].timestamp);
+  const lastDate = parseDate(chartData[chartData.length - 1].timestamp);
+  
+  // Generate 6 time labels across the data span
+  const timeLabels = [];
+  for(let i = 0; i < 6; i++) {
+    const fraction = i / 5; // 0, 0.2, 0.4, 0.6, 0.8, 1.0
+    const timeMs = firstDate.getTime() + (lastDate.getTime() - firstDate.getTime()) * fraction;
+    const labelDate = new Date(timeMs);
+    const hours = String(labelDate.getHours()).padStart(2, '0');
+    const minutes = String(labelDate.getMinutes()).padStart(2, '0');
+    timeLabels.push(`${hours}:${minutes}`);
+  }
+  
+  // Update time labels in all three charts
+  const xPositions = [50, 170, 290, 410, 530, 650, 770];
+  charts.forEach(chart => {
+    // Find all text elements that are time labels (at y=220)
+    const timeTexts = chart.querySelectorAll('text[y="220"]');
+    timeTexts.forEach((text, i) => {
+      if(i < timeLabels.length) {
+        text.textContent = timeLabels[i];
+      }
+    });
+  });
+  
+  console.log(`🕐 Updated time labels: ${timeLabels[0]} → ${timeLabels[5]}`);
+}
+
 function updateCharts(chartData){
   if(!chartData || chartData.length < 1) return;
   
   const charts = qAll('svg.metric-chart');
   if(charts.length < 3) return;
   
-  // Calculate X positions based on actual number of data points (spread across 820px width)
+  // Calculate time-based X positions
+  // Parse timestamps and map to 24-hour timeline
   const dataPoints = chartData.length;
-  const xStep = dataPoints > 1 ? 820 / (dataPoints - 1) : 0;
   
-  console.log(`📈 Rendering ${dataPoints} data points on charts (${(xStep).toFixed(2)}px per point)`);
+  // Get first and last timestamps
+  const firstDate = parseDate(chartData[0].timestamp);
+  const lastDate = parseDate(chartData[dataPoints - 1].timestamp);
+  const timeSpanMs = lastDate.getTime() - firstDate.getTime();
+  const oneDayMs = 24 * 60 * 60 * 1000;
+  
+  // Calculate position mapping: x goes from 50 to 870 (820px available)
+  const xMin = 50;
+  const xMax = 870;
+  const xRange = xMax - xMin;
+  
+  console.log(`📈 Rendering ${dataPoints} data points over ${(timeSpanMs / 3600000).toFixed(1)} hours`);
+  console.log(`⏰ Time span: ${firstDate.toLocaleTimeString()} to ${lastDate.toLocaleTimeString()}`);
+  
+  // Helper function to calculate X position from timestamp
+  function getXFromTimestamp(timestamp) {
+    const pointDate = parseDate(timestamp);
+    const pointMs = pointDate.getTime();
+    const msFromStart = pointMs - firstDate.getTime();
+    // Map to percentage of time span, then to x coordinate
+    const fraction = timeSpanMs > 0 ? msFromStart / timeSpanMs : 0;
+    return xMin + (fraction * xRange);
+  }
   
   // Temperature chart
   const tempPoly = charts[0].querySelector('polyline');
@@ -727,8 +786,8 @@ function updateCharts(chartData){
     const minT = 14, maxT = 32;
     const range = maxT - minT;
     
-    chartData.forEach((d, i) => {
-      const x = 40 + (i * xStep);
+    chartData.forEach((d) => {
+      const x = getXFromTimestamp(d.timestamp);
       const normalized = Math.max(0, Math.min(1, (d.temp - minT) / range));
       const y = 230 - (normalized * 200);
       points += x + ',' + y + ' ';
@@ -744,8 +803,8 @@ function updateCharts(chartData){
     const minH = 50, maxH = 95;
     const range = maxH - minH;
     
-    chartData.forEach((d, i) => {
-      const x = 40 + (i * xStep);
+    chartData.forEach((d) => {
+      const x = getXFromTimestamp(d.timestamp);
       const normalized = Math.max(0, Math.min(1, (d.humidity - minH) / range));
       const y = 230 - (normalized * 200);
       points += x + ',' + y + ' ';
@@ -761,8 +820,8 @@ function updateCharts(chartData){
     const minV = 0, maxV = 2.5;
     const range = maxV - minV;
     
-    chartData.forEach((d, i) => {
-      const x = 40 + (i * xStep);
+    chartData.forEach((d) => {
+      const x = getXFromTimestamp(d.timestamp);
       const normalized = Math.max(0, Math.min(1, (d.vpd - minV) / range));
       const y = 200 - (normalized * 180);
       points += x + ',' + y + ' ';
@@ -958,6 +1017,7 @@ function applyFilter(){
     updateComparisonTableWithStatus(temp, humidity, vpd);
     
     const chartData = generateChartData(filtered);
+    updateChartTimeLabels(chartData);
     updateCharts(chartData);
   }
 }
