@@ -827,5 +827,61 @@ footer .social-links a:has(.fa-telegram) i{color:#0088cc}
   filter: brightness(1.1);
 }
 
+/* Methodology Section Styles */
+.methodology {
+  margin: 30px 0;
+}
+
+.methodology h2 {
+  color: #1a472a;
+  font-size: 1.6rem;
+  margin-bottom: 15px;
+  line-height: 1.4;
+}
+
+.methodology h3 {
+  color: #27ae60;
+  font-size: 1.25rem;
+  margin: 20px 0 15px;
+  font-weight: 600;
+}
+
+.methodology h4 {
+  color: #16a34a;
+  font-size: 1.05rem;
+  margin: 18px 0 10px;
+  font-weight: 600;
+}
+
+.methodology-content {
+  color: #333;
+  line-height: 1.7;
+}
+
+.methodology-content p {
+  margin-bottom: 15px;
+  color: #444;
+}
+
+.methodology-content ul {
+  margin: 12px 0 20px 25px;
+  line-height: 1.8;
+}
+
+.methodology-content li {
+  margin-bottom: 10px;
+  color: #444;
+}
+
+.methodology-content strong {
+  color: #1a472a;
+  font-weight: 600;
+}
+
+.methodology-content em {
+  color: #555;
+  font-style: italic;
+}
+
 /* end debug styles */
 
