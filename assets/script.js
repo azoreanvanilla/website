@@ -712,37 +712,47 @@ function generateChartData(dataRows){
 function updateChartTimeLabels(chartData) {
   if(!chartData || chartData.length < 1) return;
   
-  // Update X-axis time labels to reflect actual data time span
   const charts = qAll('svg.metric-chart');
   if(charts.length < 3) return;
   
+  // Get exact first and last timestamps
   const firstDate = parseDate(chartData[0].timestamp);
   const lastDate = parseDate(chartData[chartData.length - 1].timestamp);
   
-  // Generate 6 time labels across the data span
+  const timeSpanMs = lastDate.getTime() - firstDate.getTime();
+  const timeSpanHours = timeSpanMs / (1000 * 60 * 60);
+  
+  console.log(`📊 Chart time range: ${firstDate.toLocaleTimeString()} to ${lastDate.toLocaleTimeString()}`);
+  console.log(`📊 Time span: ${timeSpanHours.toFixed(1)} hours, ${chartData.length} data points`);
+  
+  // Generate 6 time labels based on actual time range
   const timeLabels = [];
-  for(let i = 0; i < 6; i++) {
-    const fraction = i / 5; // 0, 0.2, 0.4, 0.6, 0.8, 1.0
+  const xPositions = [50, 170, 290, 410, 530, 650, 770];
+  
+  for(let i = 0; i < xPositions.length; i++) {
+    const fraction = i / (xPositions.length - 1); // 0 to 1
     const timeMs = firstDate.getTime() + (lastDate.getTime() - firstDate.getTime()) * fraction;
     const labelDate = new Date(timeMs);
     const hours = String(labelDate.getHours()).padStart(2, '0');
     const minutes = String(labelDate.getMinutes()).padStart(2, '0');
-    timeLabels.push(`${hours}:${minutes}`);
+    timeLabels.push({
+      time: `${hours}:${minutes}`,
+      x: xPositions[i]
+    });
   }
   
   // Update time labels in all three charts
-  const xPositions = [50, 170, 290, 410, 530, 650, 770];
   charts.forEach(chart => {
-    // Find all text elements that are time labels (at y=220)
     const timeTexts = chart.querySelectorAll('text[y="220"]');
     timeTexts.forEach((text, i) => {
       if(i < timeLabels.length) {
-        text.textContent = timeLabels[i];
+        text.textContent = timeLabels[i].time;
+        text.setAttribute('x', timeLabels[i].x);
       }
     });
   });
   
-  console.log(`🕐 Updated time labels: ${timeLabels[0]} → ${timeLabels[5]}`);
+  console.log(`🕐 Time labels: ${timeLabels[0].time} → ${timeLabels[timeLabels.length-1].time}`);
 }
 
 function updateCharts(chartData){
@@ -751,29 +761,28 @@ function updateCharts(chartData){
   const charts = qAll('svg.metric-chart');
   if(charts.length < 3) return;
   
-  // Calculate time-based X positions
-  // Parse timestamps and map to 24-hour timeline
-  const dataPoints = chartData.length;
-  
-  // Get first and last timestamps
+  // Get exact first and last timestamps
   const firstDate = parseDate(chartData[0].timestamp);
-  const lastDate = parseDate(chartData[dataPoints - 1].timestamp);
+  const lastDate = parseDate(chartData[chartData.length - 1].timestamp);
   const timeSpanMs = lastDate.getTime() - firstDate.getTime();
-  const oneDayMs = 24 * 60 * 60 * 1000;
+  
+  console.log(`📈 Rendering ${chartData.length} points from ${firstDate.toLocaleTimeString()} to ${lastDate.toLocaleTimeString()}`);
   
   // Calculate position mapping: x goes from 50 to 870 (820px available)
   const xMin = 50;
   const xMax = 870;
   const xRange = xMax - xMin;
   
-  console.log(`📈 Rendering ${dataPoints} data points over ${(timeSpanMs / 3600000).toFixed(1)} hours`);
-  console.log(`⏰ Time span: ${firstDate.toLocaleTimeString()} to ${lastDate.toLocaleTimeString()}`);
-  
-  // Helper function to calculate X position from timestamp
+  // Helper function to calculate X position from exact timestamp
   function getXFromTimestamp(timestamp) {
     const pointDate = parseDate(timestamp);
     const pointMs = pointDate.getTime();
     const msFromStart = pointMs - firstDate.getTime();
+    
+    // Prevent negative values or overflow
+    if(msFromStart < 0) return xMin;
+    if(msFromStart > timeSpanMs) return xMax;
+    
     // Map to percentage of time span, then to x coordinate
     const fraction = timeSpanMs > 0 ? msFromStart / timeSpanMs : 0;
     return xMin + (fraction * xRange);
@@ -790,10 +799,10 @@ function updateCharts(chartData){
       const x = getXFromTimestamp(d.timestamp);
       const normalized = Math.max(0, Math.min(1, (d.temp - minT) / range));
       const y = 230 - (normalized * 200);
-      points += x + ',' + y + ' ';
+      points += x.toFixed(1) + ',' + y.toFixed(1) + ' ';
     });
     tempPoly.setAttribute('points', points.trim());
-    console.log('✓ Temperature chart updated with ' + dataPoints + ' points');
+    console.log(`✓ Temperature: ${chartData.length} points mapped`);
   }
   
   // Humidity chart
@@ -807,10 +816,10 @@ function updateCharts(chartData){
       const x = getXFromTimestamp(d.timestamp);
       const normalized = Math.max(0, Math.min(1, (d.humidity - minH) / range));
       const y = 230 - (normalized * 200);
-      points += x + ',' + y + ' ';
+      points += x.toFixed(1) + ',' + y.toFixed(1) + ' ';
     });
     humPoly.setAttribute('points', points.trim());
-    console.log('✓ Humidity chart updated with ' + dataPoints + ' points');
+    console.log(`✓ Humidity: ${chartData.length} points mapped`);
   }
   
   // VPD chart
@@ -824,10 +833,10 @@ function updateCharts(chartData){
       const x = getXFromTimestamp(d.timestamp);
       const normalized = Math.max(0, Math.min(1, (d.vpd - minV) / range));
       const y = 200 - (normalized * 180);
-      points += x + ',' + y + ' ';
+      points += x.toFixed(1) + ',' + y.toFixed(1) + ' ';
     });
     vpdPoly.setAttribute('points', points.trim());
-    console.log('✓ VPD chart updated with ' + dataPoints + ' points');
+    console.log(`✓ VPD: ${chartData.length} points mapped`);
   }
 }
 
