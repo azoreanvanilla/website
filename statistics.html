@@ -20,7 +20,8 @@
   (function(){
     function qAll(s){return Array.from(document.querySelectorAll(s));}
     function apply(map){ qAll('[data-i18n]').forEach(el=>{const k=el.getAttribute('data-i18n'); if(map && map[k]) try{ el.innerText = map[k]; }catch(e){} }); qAll('.lang-switch button').forEach(b=>b.classList.toggle('active', b.getAttribute('data-lang')===window.__site_lang)); }
-    fetch('assets/translations.json').then(r=>r.json()).then(trans=>{ window.__TRANSLATIONS = trans; window.__site_lang = localStorage.getItem('site_lang') || 'en'; apply(window.__TRANSLATIONS[window.__site_lang] || window.__TRANSLATIONS.en); qAll('.lang-switch button').forEach(b=> b.addEventListener('click', ()=>{ window.__site_lang = b.getAttribute('data-lang'); localStorage.setItem('site_lang', window.__site_lang); apply(window.__TRANSLATIONS[window.__site_lang] || window.__TRANSLATIONS.en); })); }).catch(e=>console.warn('translations.json load failed',e));
+    window.__applyI18n = apply;
+    fetch('assets/translations.json').then(r=>r.json()).then(trans=>{ window.__TRANSLATIONS = trans; window.__site_lang = localStorage.getItem('site_lang') || 'en'; apply(window.__TRANSLATIONS[window.__site_lang] || window.__TRANSLATIONS.en); qAll('.lang-switch button').forEach(b=> b.addEventListener('click', ()=>{ window.__site_lang = b.getAttribute('data-lang'); localStorage.setItem('site_lang', window.__site_lang); apply(window.__TRANSLATIONS[window.__site_lang] || window.__TRANSLATIONS.en); if(window.__updateStatusesOnLangChange) window.__updateStatusesOnLangChange(); })); }).catch(e=>console.warn('translations.json load failed',e));
   })();
   </script>
 </head>
@@ -76,25 +77,25 @@
         <div class="gauge-card">
           <div class="gauge-label" data-i18n="metric_temperature">Temperature</div>
           <div class="gauge-value">
-            <span id="live-temp">24.5</span><span class="unit">°C</span>
+            <span id="live-temp">--</span><span class="unit">°C</span>
           </div>
-          <div class="gauge-status" id="gauge-temp-status">Optimal</div>
-          <div class="gauge-range">18–24°C</div>
+          <div class="gauge-status" id="gauge-temp-status">--</div>
+          <div class="gauge-range" id="temp-target-range"></div>
         </div>
         <div class="gauge-card">
           <div class="gauge-label" data-i18n="metric_humidity">Humidity</div>
           <div class="gauge-value">
-            <span id="live-hum">72</span><span class="unit">%</span>
+            <span id="live-hum">--</span><span class="unit">%</span>
           </div>
-          <div class="gauge-status" id="gauge-hum-status">Optimal</div>
-          <div class="gauge-range">65–75%</div>
+          <div class="gauge-status" id="gauge-hum-status">--</div>
+          <div class="gauge-range" id="hum-target-range"></div>
         </div>
         <div class="gauge-card">
           <div class="gauge-label" data-i18n="metric_vpd">VPD</div>
           <div class="gauge-value">
-            <span id="live-vpd">1.2</span><span class="unit">kPa</span>
+            <span id="live-vpd">--</span><span class="unit">kPa</span>
           </div>
-          <div class="gauge-status" id="gauge-vpd-status">Ideal</div>
+          <div class="gauge-status" id="gauge-vpd-status">--</div>
           <div class="gauge-range" id="vpd-target-range"></div>
         </div>
       </div>
@@ -123,7 +124,7 @@
 
     <!-- OUTDOOR CONDITIONS -->
     <section class="live-conditions card">
-      <h2>Current Outdoor Conditions</h2>
+      <h2 data-i18n="current_outdoor_conditions">Current Outdoor Conditions</h2>
       <div class="gauge-grid">
         <div class="gauge-card">
           <div class="gauge-label" data-i18n="metric_temperature">Temperature</div>
@@ -131,7 +132,7 @@
             <span id="outdoor-temp">--</span><span class="unit">°C</span>
           </div>
           <div class="gauge-status" id="gauge-outdoor-temp-status">--</div>
-          <div class="gauge-range">Azorean Average</div>
+          <div class="gauge-range" data-i18n="azorean_average">Azorean Average</div>
         </div>
         <div class="gauge-card">
           <div class="gauge-label" data-i18n="metric_humidity">Humidity</div>
@@ -139,7 +140,7 @@
             <span id="outdoor-hum">--</span><span class="unit">%</span>
           </div>
           <div class="gauge-status" id="gauge-outdoor-hum-status">--</div>
-          <div class="gauge-range">Azorean Average</div>
+          <div class="gauge-range" data-i18n="azorean_average">Azorean Average</div>
         </div>
         <div class="gauge-card">
           <div class="gauge-label" data-i18n="metric_vpd">VPD</div>
@@ -147,14 +148,14 @@
             <span id="outdoor-vpd">--</span><span class="unit">kPa</span>
           </div>
           <div class="gauge-status" id="gauge-outdoor-vpd-status">--</div>
-          <div class="gauge-range">Outdoor VPD</div>
+          <div class="gauge-range" data-i18n="outdoor_vpd">Outdoor VPD</div>
         </div>
       </div>
     </section>
 
     <!-- OUTDOOR ENVIRONMENT ASSESSMENT -->
     <section class="plant-status card">
-      <h2>Outdoor Environment Assessment</h2>
+      <h2 data-i18n="outdoor_assessment">Outdoor Environment Assessment</h2>
       <div class="status-display" id="outdoor-assess-display">
         <div class="status-item status-good">
           <span class="status-icon">🟢</span>
@@ -170,24 +171,24 @@
       <p class="comparison-intro" data-i18n="comparison_intro">The comparison below illustrates why our greenhouse design is a breakthrough for vanilla cultivation in the Azores. Outside, the island's temperate climate is beautiful but insufficient for vanilla. Inside, we engineer the tropics.</p>
       <div class="comparison-table">
         <div class="comparison-row header">
-          <div class="comparison-cell metric">Metric</div>
-          <div class="comparison-cell inside">Inside Greenhouse</div>
-          <div class="comparison-cell outside">Outside (Azores)</div>
+          <div class="comparison-cell metric" data-i18n="comp_metric">Metric</div>
+          <div class="comparison-cell inside" data-i18n="comp_inside">Inside Greenhouse</div>
+          <div class="comparison-cell outside" data-i18n="comp_outside">Outside (Azores)</div>
         </div>
         <div class="comparison-row">
           <div class="comparison-cell metric" data-i18n="comp_temperature">Temperature</div>
-          <div class="comparison-cell inside" id="comp-temp-inside">24.5°C <span class="badge">✓</span></div>
-          <div class="comparison-cell outside" id="comp-temp-outside">18.2°C <span class="badge">↓</span></div>
+          <div class="comparison-cell inside" id="comp-temp-inside">--°C <span class="badge">--</span></div>
+          <div class="comparison-cell outside" id="comp-temp-outside">--°C <span class="badge">--</span></div>
         </div>
         <div class="comparison-row">
           <div class="comparison-cell metric" data-i18n="comp_humidity">Humidity</div>
-          <div class="comparison-cell inside" id="comp-hum-inside">72% <span class="badge">✓</span></div>
-          <div class="comparison-cell outside" id="comp-hum-outside">65% <span class="badge">→</span></div>
+          <div class="comparison-cell inside" id="comp-hum-inside">--% <span class="badge">--</span></div>
+          <div class="comparison-cell outside" id="comp-hum-outside">--% <span class="badge">--</span></div>
         </div>
         <div class="comparison-row">
           <div class="comparison-cell metric" data-i18n="comp_vpd">VPD</div>
-          <div class="comparison-cell inside" id="comp-vpd-inside">1.2 kPa <span class="badge">✓</span></div>
-          <div class="comparison-cell outside" id="comp-vpd-outside">1.8 kPa <span class="badge">↑</span></div>
+          <div class="comparison-cell inside" id="comp-vpd-inside">-- kPa <span class="badge">--</span></div>
+          <div class="comparison-cell outside" id="comp-vpd-outside">-- kPa <span class="badge">--</span></div>
         </div>
       </div>
       <p class="comparison-conclusion" data-i18n="comparison_conclusion">Why This Matters: Our greenhouse creates a microclimate that vanilla orchids crave—precision weather engineering. This data validates our competitive edge: we use the Azores' renewable energy abundance to power IoT-driven climate control that transforms a temperate island into a vanilla paradise.</p>
@@ -200,7 +201,7 @@
       
       <!-- TEMPERATURE CHART -->
       <div class="chart-container">
-        <h4 style="margin: 20px 0 10px; color: #0066cc; font-weight: 600;">Temperature (°C)</h4>
+        <h4 style="margin: 20px 0 10px; color: #0066cc; font-weight: 600;" data-i18n="chart_temperature_label">Temperature (°C)</h4>
         <svg viewBox="0 0 900 250" class="metric-chart">
           <defs>
             <linearGradient id="temp-grad" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -252,7 +253,7 @@
 
       <!-- HUMIDITY CHART -->
       <div class="chart-container">
-        <h4 style="margin: 20px 0 10px; color: #27ae60; font-weight: 600;">Humidity (%)</h4>
+        <h4 style="margin: 20px 0 10px; color: #27ae60; font-weight: 600;" data-i18n="chart_humidity_label">Humidity (%)</h4>
         <svg viewBox="0 0 900 250" class="metric-chart">
           <defs>
             <linearGradient id="hum-grad" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -456,7 +457,7 @@
       <div class="filters">
         <label><span data-i18n="from_label">From</span> <input type="date" id="from"></label>
         <label><span data-i18n="to_label">To</span> <input type="date" id="to"></label>
-        <label><span>Location</span>
+        <label><span data-i18n="table_location">Location</span>
           <select id="location-filter">
             <option value="greenhouse">Greenhouse</option>
             <option value="outdoor">Outdoor</option>
@@ -472,7 +473,7 @@
           <thead>
             <tr>
               <th data-i18n="col_datetime">Datetime</th>
-              <th>Location</th>
+              <th data-i18n="table_location">Location</th>
               <th data-i18n="col_temp">Temperature (°C)</th>
               <th data-i18n="col_hum">Humidity (%)</th>
               <th data-i18n="col_vpd">VPD (kPa)</th>
@@ -509,6 +510,52 @@
     </div>
   </footer>
 
-
+  <script>
+    // Initialize data loading when functions are ready
+    function ensureLoaded() {
+      return new Promise(resolve => {
+        if (typeof loadCurrentValues === 'function' && 
+            typeof loadChartsData === 'function' && 
+            typeof loadTableData === 'function') {
+          resolve();
+        } else {
+          setTimeout(() => ensureLoaded().then(resolve), 50);
+        }
+      });
+    }
+    
+    ensureLoaded().then(() => {
+      // Load current values immediately
+      loadCurrentValues();
+      
+      // Load chart data when visible
+      const chartSection = document.querySelector('section:has(.metric-chart)');
+      if (chartSection) {
+        const observer = new IntersectionObserver((entries) => {
+          if (entries[0].isIntersecting) {
+            loadChartsData();
+            observer.disconnect();
+          }
+        });
+        observer.observe(chartSection);
+      } else {
+        loadChartsData();
+      }
+      
+      // Load table data when visible
+      const tableSection = document.querySelector('.data-explorer');
+      if (tableSection) {
+        const observer = new IntersectionObserver((entries) => {
+          if (entries[0].isIntersecting) {
+            loadTableData();
+            observer.disconnect();
+          }
+        });
+        observer.observe(tableSection);
+      } else {
+        loadTableData();
+      }
+    });
+  </script>
 </body>
 </html>

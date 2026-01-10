@@ -1,4 +1,47 @@
 // ========== SECURITY & UTILITY FUNCTIONS ==========
+
+// Get translated text using i18n system (without status_ prefix)
+function getTranslation(key) {
+  if (!window.__TRANSLATIONS) return key;
+  const lang = window.__site_lang || 'en';
+  const trans = window.__TRANSLATIONS[lang] || window.__TRANSLATIONS.en || {};
+  return trans[key] || key;
+}
+
+// Get translated status text using i18n system
+function getStatusText(statusKey) {
+  if (!window.__TRANSLATIONS) return statusKey;
+  const lang = window.__site_lang || 'en';
+  const trans = window.__TRANSLATIONS[lang] || window.__TRANSLATIONS.en || {};
+  return trans['status_' + statusKey] || trans[statusKey] || statusKey;
+}
+
+// Store current values for re-rendering on language change
+let currentGreenhouseValues = { temp: null, humidity: null, vpd: null };
+let currentOutdoorValues = { temp: null, humidity: null, vpd: null };
+
+// Function to update statuses when language changes
+function updateStatusesOnLanguageChange() {
+  if (currentGreenhouseValues.temp !== null) {
+    updateGaugeStatus(currentGreenhouseValues.temp, currentGreenhouseValues.humidity, currentGreenhouseValues.vpd);
+  }
+  if (currentOutdoorValues.temp !== null) {
+    updateOutdoorGaugeStatus(currentOutdoorValues.temp, currentOutdoorValues.humidity, currentOutdoorValues.vpd);
+    updateOutdoorAssessmentStatus(currentOutdoorValues.temp, currentOutdoorValues.humidity, currentOutdoorValues.vpd);
+  }
+  // Update dropdown options translations
+  const locationSelect = q('#location-filter');
+  if (locationSelect) {
+    const options = locationSelect.querySelectorAll('option');
+    if (options[0]) options[0].textContent = getTranslation('option_greenhouse');
+    if (options[1]) options[1].textContent = getTranslation('option_outdoor');
+    if (options[2]) options[2].textContent = getTranslation('option_both');
+  }
+}
+
+// Expose the function for the HTML language change handler
+window.__updateStatusesOnLangChange = updateStatusesOnLanguageChange;
+
 // Vanilla cultivation policies by season
 const POLICIES = {
   "Dormancy": { m: [12, 1, 2], t_min: 18, t_max: 24, h_min: 65, h_max: 75, dv: 0.7, nv: 0.5, v_tol_day: 0.2, v_tol_night: 0.1 },
@@ -55,7 +98,7 @@ function getVpdTolerance(policy) {
 // ========== METRIC CARD UPDATES ==========
 // Update the "What the Numbers Mean" metric cards with policy-based ranges
 // Update policy-based metric card ranges (temperature, humidity, VPD ranges)
-function updateMetricCardRanges() {
+function updateMetricCardRanges(temp, humidity, vpd) {
   // Only update if we're on a page with these elements
   if(!q('#card-temp-range')) return;
   
@@ -68,6 +111,12 @@ function updateMetricCardRanges() {
   const tempRangeEl = q('#card-temp-range');
   if(tempRangeEl) {
     tempRangeEl.textContent = policy.t_min + '–' + policy.t_max + '°C (' + Math.round((policy.t_min * 9/5) + 32) + '–' + Math.round((policy.t_max * 9/5) + 32) + '°F)';
+  }
+  
+  // Update current temperature if provided
+  const tempCurrentEl = q('#card-temp');
+  if(tempCurrentEl && temp !== undefined && temp !== null) {
+    tempCurrentEl.textContent = temp.toFixed(1);
   }
   
   const tempGrowthEl = q('#card-temp-growth');
@@ -83,6 +132,12 @@ function updateMetricCardRanges() {
     humRangeEl.textContent = policy.h_min + '–' + policy.h_max + '% (Relative Humidity)';
   }
   
+  // Update current humidity if provided
+  const humCurrentEl = q('#card-hum');
+  if(humCurrentEl && humidity !== undefined && humidity !== null) {
+    humCurrentEl.textContent = humidity.toFixed(0);
+  }
+  
   const humBalanceEl = q('#card-hum-balance');
   if(humBalanceEl) {
     const belowThresh = policy.h_min - 5;
@@ -96,6 +151,12 @@ function updateMetricCardRanges() {
     const vpdMin = (vpdTarget - vpdTol).toFixed(1);
     const vpdMax = (vpdTarget + vpdTol).toFixed(1);
     vpdRangeEl.textContent = vpdMin + '–' + vpdMax + ' kPa (Kilopascals)';
+  }
+  
+  // Update current VPD if provided
+  const vpdCurrentEl = q('#card-vpd');
+  if(vpdCurrentEl && vpd !== undefined && vpd !== null) {
+    vpdCurrentEl.textContent = vpd.toFixed(2);
   }
   
   const vpdTooLowEl = q('#card-vpd-too-low');
@@ -441,76 +502,93 @@ function showMessage(msg){
   setTimeout(() => div.remove(), 2000);
 }
 
-async function loadStats(){
-  try{
-    const res = await fetch('data/stats.csv');
-    const csvText = await res.text();
-    const data = parseCSV(csvText);
-    window.__stats = data;
+// Load current values from latest_results.json
+async function loadCurrentValues(){
+  try {
+    const res = await fetch('data/latest_results.json');
+    if (!res.ok) return;
     
-    // Filter to greenhouse by default
-    const greenhouse = data.filter(r => r._values[1] === 'greenhouse');
+    const data = await res.json();
     
-    // Show last 24 rows from greenhouse data
-    const last24h = greenhouse.slice(-24);
-    renderRows(last24h);
-    
-    // Update dashboard with latest greenhouse data
-    if(greenhouse.length > 0) {
-      const latest = greenhouse[greenhouse.length - 1];
-      const temp = parseFloat(latest._values[2]);
-      const humidity = parseFloat(latest._values[3]);
-      const vpd = parseFloat(latest._values[4]);
+    // Update greenhouse conditions
+    if (data.greenhouse) {
+      const gh = data.greenhouse;
+      // Store current values for language change updates
+      currentGreenhouseValues = { temp: gh.temp, humidity: gh.humidity, vpd: gh.vpd };
       
-      // Update live conditions
-      const tempEl = q('#live-temp');
-      const humEl = q('#live-hum');
-      const vpdEl = q('#live-vpd');
+      const setIfExists = (id, value, formatter) => {
+        const el = q(id);
+        if(el) el.textContent = value !== null ? formatter(value) : '--';
+      };
       
-      if(tempEl) tempEl.textContent = temp.toFixed(1);
-      if(humEl) humEl.textContent = humidity.toFixed(0);
-      if(vpdEl) vpdEl.textContent = vpd.toFixed(2);
+      setIfExists('#live-temp', gh.temp, v => v.toFixed(1));
+      setIfExists('#live-hum', gh.humidity, v => v.toFixed(0));
+      setIfExists('#live-vpd', gh.vpd, v => v.toFixed(2));
       
-      // Update comparison table and plant status with latest data
-      updateComparisonTableWithStatus(temp, humidity, vpd);
-      updatePlantStatus(temp, humidity, vpd);
-      updateGaugeStatus(temp, humidity, vpd);
-      updateMetricCards(temp, humidity, vpd);
-      
-      // Update charts with last 24 rows from greenhouse
-      const chartData = generateChartData(greenhouse);
-      updateChartTimeLabels(chartData);
-      updateCharts(chartData);
+      updateComparisonTableWithStatus(gh.temp, gh.humidity, gh.vpd);
+      updatePlantStatus(gh.temp, gh.humidity, gh.vpd);
+      updateGaugeStatus(gh.temp, gh.humidity, gh.vpd);
+      updateMetricCardRanges(gh.temp, gh.humidity, gh.vpd);
+      updateGaugeRanges(getCurrentPolicy().policy);
     }
     
-    // Update outdoor data
-    const outdoor = data.filter(r => r._values[1] === 'outdoor');
-    if(outdoor.length > 0) {
-      const latestOutdoor = outdoor[outdoor.length - 1];
-      const outTemp = parseFloat(latestOutdoor._values[2]);
-      const outHumidity = parseFloat(latestOutdoor._values[3]);
-      const outVpd = parseFloat(latestOutdoor._values[4]);
+    // Update outdoor conditions
+    if (data.outdoor) {
+      const out = data.outdoor;
+      // Store current values for language change updates
+      currentOutdoorValues = { temp: out.temp, humidity: out.humidity, vpd: out.vpd };
       
-      // Update outdoor conditions display
-      const outTempEl = q('#outdoor-temp');
-      const outHumEl = q('#outdoor-hum');
-      const outVpdEl = q('#outdoor-vpd');
+      const setIfExists = (id, value, formatter) => {
+        const el = q(id);
+        if(el) el.textContent = value !== null ? formatter(value) : '--';
+      };
       
-      if(outTempEl) outTempEl.textContent = outTemp.toFixed(1);
-      if(outHumEl) outHumEl.textContent = outHumidity.toFixed(0);
-      if(outVpdEl) outVpdEl.textContent = outVpd.toFixed(2);
+      setIfExists('#outdoor-temp', out.temp, v => v.toFixed(1));
+      setIfExists('#outdoor-hum', out.humidity, v => v.toFixed(0));
+      setIfExists('#outdoor-vpd', out.vpd, v => v.toFixed(2));
       
-      // Update outdoor status and gauges
-      updateOutdoorGaugeStatus(outTemp, outHumidity, outVpd);
-      updateOutdoorPlantStatus(outTemp, outHumidity, outVpd);
-      
-      // Update comparison table with outdoor data
-      updateComparisonTableOutdoor(outTemp, outHumidity, outVpd);
+      updateOutdoorGaugeStatus(out.temp, out.humidity, out.vpd);
+      updateOutdoorPlantStatus(out.temp, out.humidity, out.vpd);
+      updateComparisonTableOutdoor(out.temp, out.humidity, out.vpd);
     }
-  }catch(e){ 
-    console.error('Error loading stats:', e); 
+  } catch(err) {
+    // Silently fail if data unavailable
   }
 }
+
+// Load chart data from latest_24_results.csv (greenhouse only)
+async function loadChartsData(){
+  try {
+    const res = await fetch('data/latest_24_results.csv');
+    if (!res.ok) return;
+    
+    const text = await res.text();
+    const data = parseCSV(text);
+    const chartData = generateChartData(data);
+    updateCharts(chartData);
+  } catch(err) {
+    // Silently fail if data unavailable
+  }
+}
+
+// Load table data from stats.csv
+async function loadTableData(){
+  try {
+    const res = await fetch('data/stats.csv');
+    if (!res.ok) return;
+    
+    const text = await res.text();
+    const data = parseCSV(text);
+    window.__stats = data;
+  } catch(err) {
+    // Silently fail if data unavailable
+  }
+}
+
+// Each function is called independently in its specific place:
+// - loadCurrentValues() in cards/displays for greenhouse conditions
+// - loadChartsData() in chart sections
+// - loadTableData() in table/filtering sections
 
 function updateComparisonTableWithStatus(temp, humidity, vpd){
   const { name, policy } = getCurrentPolicy();
@@ -631,28 +709,28 @@ function updateGaugeStatus(temp, humidity, vpd){
   const vpdTol = getVpdTolerance(policy);
   const vpdInRange = vpd >= (targetVpd - vpdTol) && vpd <= (targetVpd + vpdTol);
   
-  const tempStatus = tempInRange ? 'Optimal' : (Math.abs(temp - policy.t_min) < 2 || Math.abs(temp - policy.t_max) < 2 ? 'Caution' : 'Critical');
-  const humStatus = humInRange ? 'Optimal' : (Math.abs(humidity - policy.h_min) < 5 || Math.abs(humidity - policy.h_max) < 5 ? 'Caution' : 'Critical');
-  const vpdStatus = vpdInRange ? 'Ideal' : (Math.abs(vpd - targetVpd) < vpdTol * 1.5 ? 'Caution' : 'Critical');
+  const tempStatus = tempInRange ? 'optimal' : (Math.abs(temp - policy.t_min) < 2 || Math.abs(temp - policy.t_max) < 2 ? 'caution' : 'critical');
+  const humStatus = humInRange ? 'optimal' : (Math.abs(humidity - policy.h_min) < 5 || Math.abs(humidity - policy.h_max) < 5 ? 'caution' : 'critical');
+  const vpdStatus = vpdInRange ? 'ideal' : (Math.abs(vpd - targetVpd) < vpdTol * 1.5 ? 'caution' : 'critical');
   
   const tempEl = q('#gauge-temp-status');
   const humEl = q('#gauge-hum-status');
   const vpdEl = q('#gauge-vpd-status');
   
-  const tempClass = tempInRange ? 'good' : (tempStatus === 'Caution' ? 'warning' : 'critical');
-  const humClass = humInRange ? 'good' : (humStatus === 'Caution' ? 'warning' : 'critical');
-  const vpdClass = vpdInRange ? 'good' : (vpdStatus === 'Caution' ? 'warning' : 'critical');
+  const tempClass = tempInRange ? 'good' : (tempStatus === 'caution' ? 'warning' : 'critical');
+  const humClass = humInRange ? 'good' : (humStatus === 'caution' ? 'warning' : 'critical');
+  const vpdClass = vpdInRange ? 'good' : (vpdStatus === 'caution' ? 'warning' : 'critical');
   
   if(tempEl) {
-    tempEl.textContent = tempStatus;
+    tempEl.textContent = getStatusText(tempStatus);
     tempEl.className = 'gauge-status ' + tempClass;
   }
   if(humEl) {
-    humEl.textContent = humStatus;
+    humEl.textContent = getStatusText(humStatus);
     humEl.className = 'gauge-status ' + humClass;
   }
   if(vpdEl) {
-    vpdEl.textContent = vpdStatus;
+    vpdEl.textContent = getStatusText(vpdStatus);
     vpdEl.className = 'gauge-status ' + vpdClass;
   }
   
@@ -698,6 +776,7 @@ function updateMetricCards(temp, humidity, vpd){
 
 function generateChartData(dataRows){
   // Filter data to last 24 hours (by timestamp, not row count)
+  // ONLY include greenhouse data (skip outdoor)
   if(dataRows.length === 0) return [];
   
   // Get the latest timestamp
@@ -708,9 +787,11 @@ function generateChartData(dataRows){
   const oneDayMs = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
   const cutoffTime = latestTime - oneDayMs;
   
-  // Filter rows from the last 24 hours
+  // Filter rows from the last 24 hours AND greenhouse location only
   const last24h = dataRows.filter(row => {
     if(!row._date) return false;
+    // Only include greenhouse data (row._values[1] is location)
+    if(row._values[1] !== 'greenhouse') return false;
     return row._date.getTime() >= cutoffTime;
   });
   
@@ -732,9 +813,17 @@ function updateChartTimeLabels(chartData) {
   const charts = qAll('svg.metric-chart');
   if(charts.length < 3) return;
   
+  // Parse date string in format "YYYY-MM-DD HH:MM:SS"
+  const parseChartDate = (timeStr) => {
+    if (!timeStr) return null;
+    const parts = timeStr.match(/(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2}):(\d{2})/);
+    if (!parts) return null;
+    return new Date(parts[1], parts[2] - 1, parts[3], parts[4], parts[5], parts[6]);
+  };
+  
   // Get exact first and last timestamps
-  const firstDate = parseDate(chartData[0].timestamp);
-  const lastDate = parseDate(chartData[chartData.length - 1].timestamp);
+  const firstDate = parseChartDate(chartData[0].timestamp);
+  const lastDate = parseChartDate(chartData[chartData.length - 1].timestamp);
   
   if(!firstDate || !lastDate) return;
   
@@ -783,10 +872,7 @@ function updateChartTimeLabels(chartData) {
 }
 
 function updateCharts(chartData){
-  if(!chartData || chartData.length < 1) {
-    console.warn('No chart data to render');
-    return;
-  }
+  if(!chartData || chartData.length < 1) return;
 
   // ===== CHART RENDERING ENGINE =====
   class ChartRenderer {
@@ -871,24 +957,24 @@ function updateCharts(chartData){
   }
 
   // Render all three charts
-  const tempPoly = document.getElementById('temp-line') || document.querySelector('svg.metric-chart:nth-of-type(1) polyline');
-  const humPoly = document.getElementById('hum-line') || document.querySelector('svg.metric-chart:nth-of-type(2) polyline');
-  const vpdPoly = document.getElementById('vpd-line') || document.querySelector('svg.metric-chart:nth-of-type(3) polyline');
+  const tempPoly = document.getElementById('temp-line');
+  const humPoly = document.getElementById('hum-line');
+  const vpdPoly = document.getElementById('vpd-line');
 
   if (tempPoly) {
-    const renderer = new ChartRenderer(tempPoly, 'temp', 14, 32);
-    renderer.render(chartData);
+    new ChartRenderer(tempPoly, 'temp', 14, 32).render(chartData);
   }
 
   if (humPoly) {
-    const renderer = new ChartRenderer(humPoly, 'humidity', 50, 95);
-    renderer.render(chartData);
+    new ChartRenderer(humPoly, 'humidity', 50, 95).render(chartData);
   }
 
   if (vpdPoly) {
-    const renderer = new ChartRenderer(vpdPoly, 'vpd', 0, 2.5);
-    renderer.render(chartData);
+    new ChartRenderer(vpdPoly, 'vpd', 0, 2.5).render(chartData);
   }
+
+  // Update time labels dynamically based on actual data timestamps
+  updateChartTimeLabels(chartData);
 }
 
 function updateOutdoorGaugeStatus(temp, humidity, vpd){
@@ -903,9 +989,9 @@ function updateOutdoorGaugeStatus(temp, humidity, vpd){
   const humInPolicy = humidity >= policy.h_min && humidity <= policy.h_max;
   const vpdInPolicy = vpd >= (targetVpd - vpdTol) && vpd <= (targetVpd + vpdTol);
   
-  const tempStatus = tempInPolicy ? 'Within Policy' : (temp < policy.t_min ? 'Below Min' : 'Above Max');
-  const humStatus = humInPolicy ? 'Within Policy' : (humidity < policy.h_min ? 'Too Dry' : 'Too Humid');
-  const vpdStatus = vpdInPolicy ? 'Within Policy' : (vpd < targetVpd - vpdTol ? 'Too Low' : 'Too High');
+  const tempStatus = tempInPolicy ? 'within_policy' : (temp < policy.t_min ? 'below_min' : 'above_max');
+  const humStatus = humInPolicy ? 'within_policy' : (humidity < policy.h_min ? 'too_dry' : 'too_humid');
+  const vpdStatus = vpdInPolicy ? 'within_policy' : (vpd < targetVpd - vpdTol ? 'too_low' : 'too_high');
   
   const tempEl = q('#gauge-outdoor-temp-status');
   const humEl = q('#gauge-outdoor-hum-status');
@@ -917,15 +1003,15 @@ function updateOutdoorGaugeStatus(temp, humidity, vpd){
   const vpdClass = vpdInPolicy ? 'good' : (Math.abs(vpd - targetVpd) < vpdTol * 1.5 ? 'warning' : 'critical');
   
   if(tempEl) {
-    tempEl.textContent = tempStatus;
+    tempEl.textContent = getStatusText(tempStatus);
     tempEl.className = 'gauge-status ' + tempClass;
   }
   if(humEl) {
-    humEl.textContent = humStatus;
+    humEl.textContent = getStatusText(humStatus);
     humEl.className = 'gauge-status ' + humClass;
   }
   if(vpdEl) {
-    vpdEl.textContent = vpdStatus;
+    vpdEl.textContent = getStatusText(vpdStatus);
     vpdEl.className = 'gauge-status ' + vpdClass;
   }
 }
@@ -943,42 +1029,42 @@ function updateOutdoorAssessmentStatus(temp, humidity, vpd){
   // Assess temperature
   const tempInRange = temp >= policy.t_min && temp <= policy.t_max;
   if(tempInRange) {
-    html += '<div class="status-item status-good"><span class="status-icon">🟢</span><span class="status-text">Temperature Optimal (' + temp.toFixed(1) + '°C)</span></div>';
+    html += '<div class="status-item status-good"><span class="status-icon">🟢</span><span class="status-text">' + getStatusText('temp_optimal') + ' (' + temp.toFixed(1) + '°C)</span></div>';
   } else {
     const distance = Math.min(Math.abs(temp - policy.t_min), Math.abs(temp - policy.t_max));
     const isWarning = distance < 2;
     if(isWarning) {
-      html += '<div class="status-item status-warning"><span class="status-icon">🟡</span><span class="status-text">Temperature Caution (' + temp.toFixed(1) + '°C)</span></div>';
+      html += '<div class="status-item status-warning"><span class="status-icon">🟡</span><span class="status-text">' + getStatusText('temp_caution') + ' (' + temp.toFixed(1) + '°C)</span></div>';
     } else {
-      html += '<div class="status-item status-critical"><span class="status-icon">🔴</span><span class="status-text">Temperature Critical (' + temp.toFixed(1) + '°C)</span></div>';
+      html += '<div class="status-item status-critical"><span class="status-icon">🔴</span><span class="status-text">' + getStatusText('temp_critical') + ' (' + temp.toFixed(1) + '°C)</span></div>';
     }
   }
   
   // Assess humidity
   const humInRange = humidity >= policy.h_min && humidity <= policy.h_max;
   if(humInRange) {
-    html += '<div class="status-item status-good"><span class="status-icon">🟢</span><span class="status-text">Humidity Optimal (' + humidity.toFixed(0) + '%)</span></div>';
+    html += '<div class="status-item status-good"><span class="status-icon">🟢</span><span class="status-text">' + getStatusText('hum_optimal') + ' (' + humidity.toFixed(0) + '%)</span></div>';
   } else {
     const distance = Math.min(Math.abs(humidity - policy.h_min), Math.abs(humidity - policy.h_max));
     const isWarning = distance < 5;
     if(isWarning) {
-      html += '<div class="status-item status-warning"><span class="status-icon">🟡</span><span class="status-text">Humidity Caution (' + humidity.toFixed(0) + '%)</span></div>';
+      html += '<div class="status-item status-warning"><span class="status-icon">🟡</span><span class="status-text">' + getStatusText('hum_caution') + ' (' + humidity.toFixed(0) + '%)</span></div>';
     } else {
-      html += '<div class="status-item status-critical"><span class="status-icon">🔴</span><span class="status-text">Humidity Critical (' + humidity.toFixed(0) + '%)</span></div>';
+      html += '<div class="status-item status-critical"><span class="status-icon">🔴</span><span class="status-text">' + getStatusText('hum_critical') + ' (' + humidity.toFixed(0) + '%)</span></div>';
     }
   }
   
   // Assess VPD
   const vpdInRange = vpd >= (policy.dv - vpdTol) && vpd <= (policy.dv + vpdTol);
   if(vpdInRange) {
-    html += '<div class="status-item status-good"><span class="status-icon">🟢</span><span class="status-text">VPD Ideal (' + vpd.toFixed(2) + ' kPa)</span></div>';
+    html += '<div class="status-item status-good"><span class="status-icon">🟢</span><span class="status-text">' + getStatusText('vpd_ideal') + ' (' + vpd.toFixed(2) + ' kPa)</span></div>';
   } else {
     const distance = Math.abs(vpd - policy.dv);
     const isWarning = distance < vpdTol * 1.5;
     if(isWarning) {
-      html += '<div class="status-item status-warning"><span class="status-icon">🟡</span><span class="status-text">VPD Caution (' + vpd.toFixed(2) + ' kPa)</span></div>';
+      html += '<div class="status-item status-warning"><span class="status-icon">🟡</span><span class="status-text">' + getStatusText('vpd_caution') + ' (' + vpd.toFixed(2) + ' kPa)</span></div>';
     } else {
-      html += '<div class="status-item status-critical"><span class="status-icon">🔴</span><span class="status-text">VPD Critical (' + vpd.toFixed(2) + ' kPa)</span></div>';
+      html += '<div class="status-item status-critical"><span class="status-icon">🔴</span><span class="status-text">' + getStatusText('vpd_critical') + ' (' + vpd.toFixed(2) + ' kPa)</span></div>';
     }
   }
   
@@ -1034,7 +1120,12 @@ function applyFilter(){
   const locationSelect = q('#location-filter');
   const selectedLocation = locationSelect?.value || 'greenhouse';
   
-  // If no dates are set, use all data filtered by location
+  // REQUIRE date period selection
+  if(!fromInput?.value || !toInput?.value) {
+    showMessage('❌ Select date period');
+    return;
+  }
+  
   let filtered = window.__stats;
   
   if(fromInput?.value && toInput?.value) {
@@ -1190,8 +1281,6 @@ document.addEventListener('DOMContentLoaded', () => {
       renderRows(greenhouse.slice(-24));
     }
   });
-
-  loadStats();
   
   // Update metric cards AFTER initial translation setup completes
   // This ensures the dynamic day/night VPD values aren't overwritten by static translations
@@ -1272,7 +1361,7 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Keyboard navigation
   document.addEventListener('keydown', (e) => {
-    if (lightbox.classList.contains('hidden')) return;
+    if (!lightbox || lightbox.classList.contains('hidden')) return;
     if (e.key === 'ArrowLeft') showPrev();
     if (e.key === 'ArrowRight') showNext();
     if (e.key === 'Escape') closeLightbox();
