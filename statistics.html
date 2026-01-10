@@ -66,7 +66,7 @@
             <span id="live-temp">24.5</span><span class="unit">°C</span>
           </div>
           <div class="gauge-status" id="gauge-temp-status">Optimal</div>
-          <div class="gauge-range" data-i18n="temp_range">20–30°C</div>
+          <div class="gauge-range">18–24°C</div>
         </div>
         <div class="gauge-card">
           <div class="gauge-label" data-i18n="metric_humidity">Humidity</div>
@@ -74,7 +74,7 @@
             <span id="live-hum">72</span><span class="unit">%</span>
           </div>
           <div class="gauge-status" id="gauge-hum-status">Optimal</div>
-          <div class="gauge-range" data-i18n="hum_range">65–85%</div>
+          <div class="gauge-range">65–75%</div>
         </div>
         <div class="gauge-card">
           <div class="gauge-label" data-i18n="metric_vpd">VPD</div>
@@ -82,12 +82,12 @@
             <span id="live-vpd">1.2</span><span class="unit">kPa</span>
           </div>
           <div class="gauge-status" id="gauge-vpd-status">Ideal</div>
-          <div class="gauge-range" data-i18n="vpd_range">0.8–1.5 kPa</div>
+          <div class="gauge-range">0.4–0.6 kPa</div>
         </div>
       </div>
     </section>
 
-    <!-- PLANT STATUS INDICATORS -->
+    <!-- PLANT STATUS INDICATORS (GREENHOUSE) -->
     <section class="plant-status card">
       <h2 data-i18n="plant_status_title">Plant Status Indicators</h2>
       <div class="status-display">
@@ -108,6 +108,58 @@
       <p class="status-updated"><small data-i18n="status_updated">Based on Research: December 2025</small></p>
     </section>
 
+    <!-- OUTDOOR CONDITIONS -->
+    <section class="live-conditions card">
+      <h2>Current Outdoor Conditions</h2>
+      <div class="gauge-grid">
+        <div class="gauge-card">
+          <div class="gauge-label" data-i18n="metric_temperature">Temperature</div>
+          <div class="gauge-value">
+            <span id="outdoor-temp">--</span><span class="unit">°C</span>
+          </div>
+          <div class="gauge-status" id="gauge-outdoor-temp-status">--</div>
+          <div class="gauge-range">Azorean Average</div>
+        </div>
+        <div class="gauge-card">
+          <div class="gauge-label" data-i18n="metric_humidity">Humidity</div>
+          <div class="gauge-value">
+            <span id="outdoor-hum">--</span><span class="unit">%</span>
+          </div>
+          <div class="gauge-status" id="gauge-outdoor-hum-status">--</div>
+          <div class="gauge-range">Azorean Average</div>
+        </div>
+        <div class="gauge-card">
+          <div class="gauge-label" data-i18n="metric_vpd">VPD</div>
+          <div class="gauge-value">
+            <span id="outdoor-vpd">--</span><span class="unit">kPa</span>
+          </div>
+          <div class="gauge-status" id="gauge-outdoor-vpd-status">--</div>
+          <div class="gauge-range">Outdoor VPD</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- OUTDOOR PLANT STATUS INDICATORS -->
+    <section class="plant-status card">
+      <h2>Outdoor Environment Assessment</h2>
+      <div class="status-display" id="outdoor-status-display">
+        <div class="status-item status-critical">
+          <span class="status-icon">🔴</span>
+          <span class="status-text">Too Cold for Vanilla</span>
+        </div>
+        <div class="status-item status-critical">
+          <span class="status-icon">🔴</span>
+          <span class="status-text">Excessive VPD Stress</span>
+        </div>
+        <div class="status-item status-critical">
+          <span class="status-icon">🔴</span>
+          <span class="status-text">Outdoor Growth Not Viable</span>
+        </div>
+      </div>
+      <p class="status-explanation" id="outdoor-status-explanation">The outdoor environment is not suitable for vanilla cultivation. This demonstrates why our greenhouse engineering is essential.</p>
+      <p class="status-updated"><small data-i18n="status_updated">Updated in real-time</small></p>
+    </section>
+
     <!-- INSIDE VS OUTSIDE COMPARISON -->
     <section class="comparison card">
       <h2 data-i18n="comparison_title">Inside vs. Outside: The Azorean Advantage</h2>
@@ -121,17 +173,17 @@
         <div class="comparison-row">
           <div class="comparison-cell metric" data-i18n="comp_temperature">Temperature</div>
           <div class="comparison-cell inside" id="comp-temp-inside">24.5°C <span class="badge">✓</span></div>
-          <div class="comparison-cell outside warning">18.2°C <span class="badge">↓</span></div>
+          <div class="comparison-cell outside" id="comp-temp-outside">18.2°C <span class="badge">↓</span></div>
         </div>
         <div class="comparison-row">
           <div class="comparison-cell metric" data-i18n="comp_humidity">Humidity</div>
           <div class="comparison-cell inside" id="comp-hum-inside">72% <span class="badge">✓</span></div>
-          <div class="comparison-cell outside good">65% <span class="badge">→</span></div>
+          <div class="comparison-cell outside" id="comp-hum-outside">65% <span class="badge">→</span></div>
         </div>
         <div class="comparison-row">
           <div class="comparison-cell metric" data-i18n="comp_vpd">VPD</div>
           <div class="comparison-cell inside" id="comp-vpd-inside">1.2 kPa <span class="badge">✓</span></div>
-          <div class="comparison-cell outside critical">1.8 kPa <span class="badge">↑</span></div>
+          <div class="comparison-cell outside" id="comp-vpd-outside">1.8 kPa <span class="badge">↑</span></div>
         </div>
       </div>
       <p class="comparison-conclusion" data-i18n="comparison_conclusion">Why This Matters: Our greenhouse creates a microclimate that vanilla orchids crave—precision weather engineering. This data validates our competitive edge: we use the Azores' renewable energy abundance to power IoT-driven climate control that transforms a temperate island into a vanilla paradise.</p>
@@ -180,9 +232,9 @@
           <line x1="650" y1="20" x2="650" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
           <line x1="770" y1="20" x2="770" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
           
-          <!-- OPTIMAL RANGE SHADING (20-30°C) -->
+          <!-- OPTIMAL RANGE SHADING (policy-based) -->
           <rect x="50" y="45" width="820" height="105" fill="url(#temp-grad)" opacity="0.5"/>
-          <text x="55" y="95" font-size="9" fill="#0066cc" opacity="0.5" font-weight="600">Optimal: 20–30°C</text>
+          <text x="55" y="95" font-size="9" fill="#0066cc" opacity="0.5" font-weight="600" id="chart-temp-label">Optimal: 18–24°C</text>
           
           <!-- TEMPERATURE LINE -->
           <polyline points="50,145 70,120 90,105 110,95 130,88 150,95 170,120 190,155 210,185 230,195 250,190 270,165 290,145 310,125 330,110 350,100 370,108 390,135 410,175 430,200 450,205 470,175 490,145 510,125 530,110 550,115 570,145 590,175 610,195 630,200 650,175 670,145 690,125 710,115 730,120 750,150 770,180 790,195 810,200 830,190 850,165 870,145" 
@@ -228,9 +280,9 @@
           <line x1="650" y1="20" x2="650" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
           <line x1="770" y1="20" x2="770" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
           
-          <!-- OPTIMAL RANGE SHADING (65-85%) -->
+          <!-- OPTIMAL RANGE SHADING (policy-based) -->
           <rect x="50" y="55" width="820" height="85" fill="url(#hum-grad)" opacity="0.5"/>
-          <text x="55" y="105" font-size="9" fill="#27ae60" opacity="0.5" font-weight="600">Optimal: 65–85%</text>
+          <text x="55" y="105" font-size="9" fill="#27ae60" opacity="0.5" font-weight="600" id="chart-hum-label">Optimal: 65–75%</text>
           
           <!-- HUMIDITY LINE (inverse of temperature) -->
           <polyline points="50,80 70,100 90,125 110,145 130,160 150,140 170,105 190,65 210,35 230,25 250,30 270,60 290,80 310,105 330,125 350,140 370,135 390,110 410,55 430,30 450,25 470,55 490,85 510,110 530,130 550,125 570,100 590,65 610,35 630,25 650,55 670,85 690,110 710,130 730,120 750,95 770,60 790,40 810,30 830,40 850,70 870,100" 
@@ -277,9 +329,9 @@
           <line x1="650" y1="20" x2="650" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
           <line x1="770" y1="20" x2="770" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
           
-          <!-- OPTIMAL RANGE SHADING (0.8-1.5 kPa) -->
+          <!-- OPTIMAL RANGE SHADING (policy-based) -->
           <rect x="50" y="80" width="820" height="56" fill="url(#vpd-grad)" opacity="0.5"/>
-          <text x="55" y="110" font-size="9" fill="#f39c12" opacity="0.5" font-weight="600">Ideal: 0.8–1.5 kPa</text>
+          <text x="55" y="110" font-size="9" fill="#f39c12" opacity="0.5" font-weight="600" id="chart-vpd-label">Ideal: 0.40–0.60 kPa</text>
           
           <!-- VPD LINE -->
           <polyline points="50,130 70,110 90,95 110,80 130,70 150,85 170,120 190,165 210,195 230,205 250,200 270,165 290,130 310,105 330,85 350,70 370,80 390,115 410,180 430,210 450,215 470,180 490,135 510,105 530,85 550,90 570,130 590,170 610,200 630,210 650,175 670,130 690,105 710,85 730,90 750,130 770,170 790,200 810,210 830,195 850,160 870,130" 
@@ -299,7 +351,7 @@
         <!-- TEMPERATURE CARD -->
         <div class="metric-card">
           <h3 data-i18n="card_temp_title">Temperature</h3>
-          <div class="metric-value" data-i18n="card_temp_range">20–30°C (68–86°F)</div>
+          <div class="metric-value" id="card-temp-range">18–24°C (64–75°F)</div>
           <div class="metric-current">
             <small data-i18n="current_label">Current:</small> <span id="card-temp">--</span>°C
           </div>
@@ -308,7 +360,7 @@
           <p data-i18n="card_temp_why">Vanilla orchids are children of the tropics. They need consistent warmth to trigger growth and flowering. Temperatures below 18°C stall development; above 32°C, the plant enters stress. Our 24.5°C sweet spot accelerates both vegetative growth and the delicate process of flower maturation.</p>
           
           <h4 data-i18n="card_temp_growth_title">Growth Signal You're Watching</h4>
-          <p data-i18n="card_temp_growth">When temperature is stable in the 24–28°C range, vanilla's metabolic engines run at peak efficiency. The plant allocates energy to developing the inflorescence (flower spike)—the precursor to our precious vanilla beans.</p>
+          <p id="card-temp-growth">When temperature is stable in the 24–28°C range, vanilla's metabolic engines run at peak efficiency. The plant allocates energy to developing the inflorescence (flower spike)—the precursor to our precious vanilla beans.</p>
           
           <h4 data-i18n="card_temp_control_title">What We Control</h4>
           <ul>
@@ -321,7 +373,7 @@
         <!-- HUMIDITY CARD -->
         <div class="metric-card">
           <h3 data-i18n="card_hum_title">Humidity</h3>
-          <div class="metric-value" data-i18n="card_hum_range">65–85% (Relative Humidity)</div>
+          <div class="metric-value" id="card-hum-range">65–75% (Relative Humidity)</div>
           <div class="metric-current">
             <small data-i18n="current_label">Current:</small> <span id="card-hum">--</span>%
           </div>
@@ -330,7 +382,7 @@
           <p data-i18n="card_hum_why">Humidity is the invisible lifeline of vanilla cultivation. At 72% RH, the air holds enough moisture to satisfy the plant's aerial roots (yes, vanilla has roots that absorb water and nutrients from humid air!), while remaining dry enough to prevent fungal diseases that plague tropical orchids.</p>
           
           <h4 data-i18n="card_hum_balance_title">The Balance</h4>
-          <p data-i18n="card_hum_balance">Below 60% RH, the plant desiccates—a death sentence in a greenhouse. Above 90% RH, fungi take over. The 65–85% window is where vanilla orchids achieve the perfect balance of hydration and disease resistance.</p>
+          <p id="card-hum-balance">Below 60% RH, the plant desiccates—a death sentence in a greenhouse. Above 90% RH, fungi take over. The 65–85% window is where vanilla orchids achieve the perfect balance of hydration and disease resistance.</p>
           
           <h4 data-i18n="card_hum_growth_title">Growth Signal You're Watching</h4>
           <p data-i18n="card_hum_growth">When humidity is stable in the ideal range, vanilla's aerial roots remain plump and functional. The plant's stomata (breathing pores) open confidently, allowing photosynthesis to proceed at full capacity. This is when growth happens fastest.</p>
@@ -347,7 +399,7 @@
         <!-- VPD CARD -->
         <div class="metric-card">
           <h3 data-i18n="card_vpd_title">VPD (Vapor Pressure Deficit)</h3>
-          <div class="metric-value" data-i18n="card_vpd_range">0.8–1.5 kPa (Kilopascals)</div>
+          <div class="metric-value" id="card-vpd-range">0.4–0.6 kPa (Kilopascals)</div>
           <div class="metric-current">
             <small data-i18n="current_label">Current:</small> <span id="card-vpd">--</span> kPa
           </div>
@@ -359,13 +411,13 @@
           <p data-i18n="card_vpd_matters">VPD directly controls how aggressively a plant transpires (releases water through leaves and aerial roots).</p>
           
           <ul>
-            <li data-i18n="card_vpd_too_low">VPD too low (< 0.6 kPa): The air is so humid that the plant can't release water. Roots suffocate. Fungi thrive.</li>
-            <li data-i18n="card_vpd_too_high">VPD too high (> 2.0 kPa): The air is so dry that the plant desperately transpires to cool itself. The plant loses water faster than roots can absorb it—inducing drought stress.</li>
-            <li data-i18n="card_vpd_sweet">VPD in the sweet spot (0.8–1.5 kPa): The plant transpires at the perfect rate. Nutrients move through the plant efficiently. Growth is maximized. The plant is neither drowning nor gasping.</li>
+            <li id="card-vpd-too-low">VPD too low (< 0.6 kPa): The air is so humid that the plant can't release water. Roots suffocate. Fungi thrive.</li>
+            <li id="card-vpd-too-high">VPD too high (> 2.0 kPa): The air is so dry that the plant desperately transpires to cool itself. The plant loses water faster than roots can absorb it—inducing drought stress.</li>
+            <li id="card-vpd-sweet">VPD in the sweet spot (0.4–0.6 kPa): The plant transpires at the perfect rate. Nutrients move through the plant efficiently. Growth is maximized. The plant is neither drowning nor gasping.</li>
           </ul>
           
           <h4 data-i18n="card_vpd_growth_title">Growth Signal You're Watching</h4>
-          <p data-i18n="card_vpd_growth">When VPD is 1.2 kPa, the plant is in "active nutrient uptake mode." The transpiration rate is optimal for moving water and dissolved nutrients from the roots to leaves and flowers. This is when the magic happens—when vanilla accumulates the sugars and compounds that will eventually become the vanilla flavor we prize.</p>
+          <p id="card-vpd-growth">When VPD is 1.2 kPa, the plant is in "active nutrient uptake mode." The transpiration rate is optimal for moving water and dissolved nutrients from the roots to leaves and flowers. This is when the magic happens—when vanilla accumulates the sugars and compounds that will eventually become the vanilla flavor we prize.</p>
           
           <h4 data-i18n="card_vpd_investor_title">Why Investors Should Care</h4>
           <p data-i18n="card_vpd_investor">VPD is the proxy for crop efficiency. At 1.2 kPa, our energy input (fans, misters, heaters) achieves maximum plant output. This is the data point that proves our climate control is not just precise—it's economical.</p>
@@ -388,6 +440,13 @@
       <div class="filters">
         <label><span data-i18n="from_label">From</span> <input type="date" id="from"></label>
         <label><span data-i18n="to_label">To</span> <input type="date" id="to"></label>
+        <label><span>Location</span>
+          <select id="location-filter">
+            <option value="greenhouse">Greenhouse</option>
+            <option value="outdoor">Outdoor</option>
+            <option value="both">Both</option>
+          </select>
+        </label>
         <button id="apply" class="btn small" data-i18n="apply">Apply</button>
         <button id="reset" class="btn small" data-i18n="reset">Reset</button>
       </div>
@@ -397,6 +456,7 @@
           <thead>
             <tr>
               <th data-i18n="col_datetime">Datetime</th>
+              <th>Location</th>
               <th data-i18n="col_temp">Temperature (°C)</th>
               <th data-i18n="col_hum">Humidity (%)</th>
               <th data-i18n="col_vpd">VPD (kPa)</th>
@@ -432,5 +492,7 @@
       <p><a href="terms.html">Terms &amp; Conditions</a></p>
     </div>
   </footer>
+
+
 </body>
 </html>

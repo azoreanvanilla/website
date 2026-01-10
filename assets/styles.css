@@ -69,7 +69,8 @@ html, body {
 /* Statistics table */
 .filters{display:flex;gap:12px;align-items:center;margin-bottom:12px}
 .filters label{font-weight:600;color:var(--muted)}
-input[type=date]{padding:8px;border-radius:8px;border:1px solid rgba(11,26,26,0.06);background:transparent;color:var(--text)}
+input[type=date], select{padding:8px;border-radius:8px;border:1px solid rgba(11,26,26,0.06);background:transparent;color:var(--text)}
+select{cursor:pointer}
 .table-wrap{overflow:auto}
 .table-wrap{border-radius:10px;overflow:auto;border:1px solid rgba(11,26,26,0.03);}
 table{width:100%;border-collapse:collapse;color:var(--text)}

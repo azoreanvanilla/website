@@ -1,4 +1,154 @@
 // ========== SECURITY & UTILITY FUNCTIONS ==========
+// Vanilla cultivation policies by season
+const POLICIES = {
+  "Dormancy": { m: [12, 1, 2], t_min: 18, t_max: 24, h_min: 65, h_max: 75, dv: 0.7, nv: 0.5, v_tol_day: 0.2, v_tol_night: 0.1 },
+  "Awakening": { m: [3], t_min: 19, t_max: 27, h_min: 65, h_max: 80, dv: 0.8, nv: 0.6, v_tol_day: 0.2, v_tol_night: 0.1 },
+  "Stress": { m: [4], t_min: 19, t_max: 27, h_min: 65, h_max: 80, dv: 0.8, nv: 0.6, v_tol_day: 0.2, v_tol_night: 0.1 },
+  "Flowering": { m: [5, 6, 7], t_min: 22, t_max: 30, h_min: 75, h_max: 85, dv: 0.8, nv: 0.5, v_tol_day: 0.2, v_tol_night: 0.1 },
+  "Maturation": { m: [8, 9], t_min: 23, t_max: 31, h_min: 70, h_max: 85, dv: 1.1, nv: 0.7, v_tol_day: 0.15, v_tol_night: 0.1 },
+  "Hardening": { m: [10, 11], t_min: 20, t_max: 26, h_min: 65, h_max: 80, dv: 0.8, nv: 0.6, v_tol_day: 0.2, v_tol_night: 0.1 }
+};
+
+// Get current policy based on current month
+function getCurrentPolicy() {
+  const now = new Date();
+  const month = now.getMonth() + 1; // 1-12
+  for (const [name, policy] of Object.entries(POLICIES)) {
+    if (policy.m.includes(month)) {
+      return { name, policy };
+    }
+  }
+  return { name: "Dormancy", policy: POLICIES.Dormancy };
+}
+
+// ========== SUN DATA & DAY/NIGHT DETECTION ==========
+// 2025 SUN DATA (Ponta Delgada, Azores) - sunrise/sunset hours
+const SUN_DATA = {
+  1: {rise: 7.9, set: 17.5}, 2: {rise: 7.6, set: 18.2}, 3: {rise: 6.8, set: 18.8}, 4: {rise: 6.1, set: 19.3},
+  5: {rise: 5.6, set: 19.8}, 6: {rise: 5.4, set: 20.3}, 7: {rise: 5.6, set: 20.3}, 8: {rise: 6.0, set: 19.7},
+  9: {rise: 6.4, set: 18.9}, 10: {rise: 6.9, set: 18.1}, 11: {rise: 7.4, set: 17.5}, 12: {rise: 7.9, set: 17.4}
+};
+
+// Determine if current time is daytime or nighttime
+function isDaylight() {
+  // Get current time in Azores timezone (UTC-1 in winter, UTC+0 in summer)
+  // Azores uses UTC-1 most of the year, UTC+0 during summer (roughly March to October)
+  const now = new Date();
+  
+  // Convert to Azores time (WET - Western European Time)
+  // Azores is UTC-1 (standard) or UTC+0 (daylight saving)
+  // Create a date formatter for Azores timezone
+  const azoresTime = new Date(now.toLocaleString('en-US', { timeZone: 'Atlantic/Azores' }));
+  
+  const month = azoresTime.getMonth() + 1; // 1-12
+  const sun = SUN_DATA[month];
+  const currentHour = azoresTime.getHours() + azoresTime.getMinutes() / 60;
+  
+  return currentHour >= sun.rise && currentHour <= sun.set;
+}
+
+// Get appropriate VPD tolerance based on day/night
+function getVpdTolerance(policy) {
+  return isDaylight() ? policy.v_tol_day : policy.v_tol_night;
+}
+
+// ========== METRIC CARD UPDATES ==========
+// Update the "What the Numbers Mean" metric cards with policy-based ranges
+// Update policy-based metric card ranges (temperature, humidity, VPD ranges)
+function updateMetricCardRanges() {
+  // Only update if we're on a page with these elements
+  if(!q('#card-temp-range')) return;
+  
+  const { name, policy } = getCurrentPolicy();
+  const isDay = isDaylight();
+  const vpdTol = getVpdTolerance(policy);
+  const vpdTarget = isDay ? policy.dv : policy.nv;  // Use nighttime VPD if it's night
+  
+  // Temperature card
+  const tempRangeEl = q('#card-temp-range');
+  if(tempRangeEl) {
+    tempRangeEl.textContent = policy.t_min + '–' + policy.t_max + '°C (' + Math.round((policy.t_min * 9/5) + 32) + '–' + Math.round((policy.t_max * 9/5) + 32) + '°F)';
+  }
+  
+  const tempGrowthEl = q('#card-temp-growth');
+  if(tempGrowthEl) {
+    const lowTemp = policy.t_min + 3;
+    const highTemp = policy.t_max - 2;
+    tempGrowthEl.textContent = 'When temperature is stable in the ' + lowTemp + '–' + highTemp + '°C range, vanilla\'s metabolic engines run at peak efficiency. The plant allocates energy to developing the inflorescence (flower spike)—the precursor to our precious vanilla beans.';
+  }
+  
+  // Humidity card
+  const humRangeEl = q('#card-hum-range');
+  if(humRangeEl) {
+    humRangeEl.textContent = policy.h_min + '–' + policy.h_max + '% (Relative Humidity)';
+  }
+  
+  const humBalanceEl = q('#card-hum-balance');
+  if(humBalanceEl) {
+    const belowThresh = policy.h_min - 5;
+    const aboveThresh = policy.h_max + 5;
+    humBalanceEl.textContent = 'Below ' + belowThresh + '% RH, the plant desiccates—a death sentence in a greenhouse. Above ' + aboveThresh + '% RH, fungi take over. The ' + policy.h_min + '–' + policy.h_max + '% window is where vanilla orchids achieve the perfect balance of hydration and disease resistance.';
+  }
+  
+  // VPD card - use day or night VPD depending on current time
+  const vpdRangeEl = q('#card-vpd-range');
+  if(vpdRangeEl) {
+    const vpdMin = (vpdTarget - vpdTol).toFixed(1);
+    const vpdMax = (vpdTarget + vpdTol).toFixed(1);
+    vpdRangeEl.textContent = vpdMin + '–' + vpdMax + ' kPa (Kilopascals)';
+  }
+  
+  const vpdTooLowEl = q('#card-vpd-too-low');
+  if(vpdTooLowEl) {
+    const threshold = (vpdTarget - vpdTol - 0.2).toFixed(2);
+    vpdTooLowEl.textContent = 'VPD too low (< ' + threshold + ' kPa): The air is so humid that the plant can\'t release water. Roots suffocate. Fungi thrive.';
+  }
+  
+  const vpdTooHighEl = q('#card-vpd-too-high');
+  if(vpdTooHighEl) {
+    const threshold = (vpdTarget + vpdTol + 0.5).toFixed(2);
+    vpdTooHighEl.textContent = 'VPD too high (> ' + threshold + ' kPa): The air is so dry that the plant desperately transpires to cool itself. The plant loses water faster than roots can absorb it—inducing drought stress.';
+  }
+  
+  const vpdSweetEl = q('#card-vpd-sweet');
+  if(vpdSweetEl) {
+    const vpdSweetMin = (vpdTarget - vpdTol).toFixed(1);
+    const vpdSweetMax = (vpdTarget + vpdTol).toFixed(1);
+    vpdSweetEl.textContent = 'VPD in the sweet spot (' + vpdSweetMin + '–' + vpdSweetMax + ' kPa): The plant transpires at the perfect rate. Nutrients move through the plant efficiently. Growth is maximized. The plant is neither drowning nor gasping.';
+  }
+  
+  const vpdGrowthEl = q('#card-vpd-growth');
+  if(vpdGrowthEl) {
+    const midVpd = policy.dv.toFixed(2);
+    vpdGrowthEl.textContent = 'When VPD is ' + midVpd + ' kPa, the plant is in "active nutrient uptake mode." The transpiration rate is optimal for moving water and dissolved nutrients from the roots to leaves and flowers. This is when the magic happens—when vanilla accumulates the sugars and compounds that will eventually become the vanilla flavor we prize.';
+  }
+}
+
+// Update chart labels with policy-based ranges
+function updateChartLabels() {
+  const { policy } = getCurrentPolicy();
+  const isDay = isDaylight();
+  const vpdTol = getVpdTolerance(policy);
+  const vpdTarget = isDay ? policy.dv : policy.nv;  // Use nighttime VPD if it's night
+  
+  const tempLabel = q('#chart-temp-label');
+  if(tempLabel) {
+    tempLabel.textContent = 'Optimal: ' + policy.t_min + '–' + policy.t_max + '°C';
+  }
+  
+  const humLabel = q('#chart-hum-label');
+  if(humLabel) {
+    humLabel.textContent = 'Optimal: ' + policy.h_min + '–' + policy.h_max + '%';
+  }
+  
+  const vpdLabel = q('#chart-vpd-label');
+  if(vpdLabel) {
+    const vpdMin = (vpdTarget - vpdTol).toFixed(2);
+    const vpdMax = (vpdTarget + vpdTol).toFixed(2);
+    vpdLabel.textContent = 'Ideal: ' + vpdMin + '–' + vpdMax + ' kPa';
+  }
+}
+
 // Input sanitization helper for safe HTML operations
 function sanitizeHTML(str) {
   const map = {
@@ -54,13 +204,13 @@ const TRANSLATIONS = {
     contact_title: 'Contact Us', contact_intro: 'We welcome inquiries about visits, purchases, and partnerships. Reach us by email, phone or social networks.', contact_email_label: 'Email:', contact_phone_label: 'Phone:', contact_address_title: 'Location', contact_address_label: 'Ribeira Grande (Conceição), São Miguel, Azores', contact_map_note: 'Map uses Google Maps embed — replace with your preferred provider if needed.', follow_us_title: 'Follow Us',
     // Statistics
     dashboard_title: 'Research Dashboard', dashboard_subtitle: 'Greenhouse Monitoring & Performance Data', dashboard_intro_why: 'At Baunilha dos Açores, we believe in open science. The data below represents our research on greenhouse conditions for vanilla cultivation in the Azores. This isn\'t just a display; it\'s an invitation to understand our methods.', dashboard_intro_for_researchers: 'For Researchers: Validate our methods. Contribute insights. See how precision climate control enables vanilla cultivation in a temperate climate.', dashboard_intro_for_investors: 'For Investors: Transparency builds trust. Watch our data patterns. Observe how we engineer a microclimate where vanilla orchids thrive—the foundation of our AgTech scalability.', dashboard_intro_for_enthusiasts: 'For Enthusiasts: Witness the delicate dance of environmental control. This is what mastering vanilla\'s \'comfort zone\' looks like in practice.', dashboard_intro_iot: 'Our greenhouse is equipped with environmental sensors. The data below illustrates the conditions we maintain to keep vanilla thriving in the Azores.',
-    live_conditions_title: 'Target Greenhouse Conditions', metric_temperature: 'Temperature', metric_humidity: 'Humidity', metric_vpd: 'VPD', status_optimal: 'Optimal', status_ideal: 'Ideal', temp_range: '20–30°C', hum_range: '65–85%', vpd_range: '0.8–1.5 kPa',
+    live_conditions_title: 'Target Greenhouse Conditions', metric_temperature: 'Temperature', metric_humidity: 'Humidity', metric_vpd: 'VPD', status_optimal: 'Optimal', status_ideal: 'Ideal', temp_range: '18–24°C', hum_range: '65–75%', vpd_range: '0.4–0.6 kPa',
     plant_status_title: 'Plant Status Indicators', status_growth_phase: 'Optimal Growth Phase', status_transpiration: 'Active Transpiration', status_monitoring: 'Monitoring for Fungi Risk', status_explanation: 'The greenhouse is in an optimal growth window. Current conditions support active nutrient absorption and plant development. VPD is ideal for stomatal function.', status_updated: 'Based on Research: December 2025',
     comparison_title: 'Inside vs. Outside: The Azorean Advantage', comparison_intro: 'The comparison below illustrates why our greenhouse design is a breakthrough for vanilla cultivation in the Azores. Outside, the island\'s temperate climate is beautiful but insufficient for vanilla. Inside, we engineer the tropics.', comp_temperature: 'Temperature', comp_humidity: 'Humidity', comp_vpd: 'VPD', comparison_conclusion: 'Why This Matters: Our greenhouse creates a microclimate that vanilla orchids crave—precision weather engineering. This data validates our competitive edge: we use the Azores\' renewable energy abundance to power climate control that transforms a temperate island into a vanilla paradise.',
     trend_title: '24-Hour Trend: The Daily Rhythm', trend_intro: 'This chart shows the natural oscillations we orchestrate. Notice how temperature dips overnight (we heat to prevent shock) and peaks midday (we ventilate to maintain the ideal range). Humidity follows the inverse: higher when it\'s cooler, managed carefully during warm hours. VPD is our true north—we adjust temperature and humidity in concert to keep VPD in the sweet spot.', chart_note: '[Interactive chart coming soon — showing Temperature (blue), Humidity (green), VPD (orange) over 24 hours]', trend_rhythm: 'This rhythm mirrors the natural day-night cycle that vanilla expects, even though we\'re controlling every variable. That\'s the essence of our technology.',
-    metrics_title: 'What the Numbers Mean: Vanilla Orchid Science', card_temp_title: 'Temperature', card_temp_range: '20–30°C (68–86°F)', card_temp_why_title: 'Why It Matters for Vanilla', card_temp_why: 'Vanilla orchids are children of the tropics. They need consistent warmth to trigger growth and flowering. Temperatures below 18°C stall development; above 32°C, the plant enters stress. Our 24.5°C sweet spot accelerates both vegetative growth and the delicate process of flower maturation.', card_temp_growth_title: 'Growth Signal You\'re Watching', card_temp_growth: 'When temperature is stable in the 24–28°C range, vanilla\'s metabolic engines run at peak efficiency. The plant allocates energy to developing the inflorescence (flower spike)—the precursor to our precious vanilla beans.', card_temp_control_title: 'What We Control', card_temp_control_heating: 'Overnight heating (prevents stress from island cool-downs)', card_temp_control_ventilation: 'Daytime ventilation (prevents overheating in summer)', card_temp_control_seasonal: 'Seasonal adjustments (respects flowering cycles)',
-    card_hum_title: 'Humidity', card_hum_range: '65–85% (Relative Humidity)', card_hum_why_title: 'Why It Matters for Vanilla', card_hum_why: 'Humidity is the invisible lifeline of vanilla cultivation. At 72% RH, the air holds enough moisture to satisfy the plant\'s aerial roots (yes, vanilla has roots that absorb water and nutrients from humid air!), while remaining dry enough to prevent fungal diseases that plague tropical orchids.', card_hum_balance_title: 'The Balance', card_hum_balance: 'Below 60% RH, the plant desiccates—a death sentence in a greenhouse. Above 90% RH, fungi take over. The 65–85% window is where vanilla orchids achieve the perfect balance of hydration and disease resistance.', card_hum_growth_title: 'Growth Signal You\'re Watching', card_hum_growth: 'When humidity is stable in the ideal range, vanilla\'s aerial roots remain plump and functional. The plant\'s stomata (breathing pores) open confidently, allowing photosynthesis to proceed at full capacity. This is when growth happens fastest.', card_hum_control_title: 'What We Control', card_hum_control_misting: 'Smart misting systems (supplement humidity during dry periods)', card_hum_control_ventilation: 'Ventilation scheduling (release excess moisture to prevent fungal blooms)', card_hum_control_dew: 'Dew point monitoring (ensures condensation forms strategically, not randomly)', card_hum_control_circulation: 'Air circulation (prevents stagnant pockets where fungi thrive)',
-    card_vpd_title: 'VPD (Vapor Pressure Deficit)', card_vpd_range: '0.8–1.5 kPa (Kilopascals)', card_vpd_what_title: 'What Is VPD? (The Science Behind the Number)', card_vpd_what: 'VPD is the "comfort zone" metric. It measures the difference between the amount of moisture the air can hold (at current temperature) and the amount it actually holds (current humidity). Think of it as the "thirst" of the air.', card_vpd_matters_title: 'Why It Matters for Vanilla', card_vpd_matters: 'VPD directly controls how aggressively a plant transpires (releases water through leaves and aerial roots).', card_vpd_too_low: 'VPD too low (< 0.6 kPa): The air is so humid that the plant can\'t release water. Roots suffocate. Fungi thrive.', card_vpd_too_high: 'VPD too high (> 2.0 kPa): The air is so dry that the plant desperately transpires to cool itself. The plant loses water faster than roots can absorb it—inducing drought stress.', card_vpd_sweet: 'VPD in the sweet spot (0.8–1.5 kPa): The plant transpires at the perfect rate. Nutrients move through the plant efficiently. Growth is maximized. The plant is neither drowning nor gasping.', card_vpd_growth_title: 'Growth Signal You\'re Watching', card_vpd_growth: 'When VPD is 1.2 kPa, the plant is in "active nutrient uptake mode." The transpiration rate is optimal for moving water and dissolved nutrients from the roots to leaves and flowers. This is when the magic happens—when vanilla accumulates the sugars and compounds that will eventually become the vanilla flavor we prize.', card_vpd_investor_title: 'Why Investors Should Care', card_vpd_investor: 'VPD is the proxy for crop efficiency. At 1.2 kPa, our energy input (fans, misters, heaters) achieves maximum plant output. This is the data point that proves our climate control is not just precise—it\'s economical.', card_vpd_control_title: 'What We Control', card_vpd_control_coordination: 'Temperature-humidity coordination (maintaining ideal VPD even as outdoor conditions swing)', card_vpd_control_monitoring: 'Active transpiration monitoring (our sensors trigger interventions before stress occurs)', card_vpd_control_seasonal: 'Seasonal VPD targets (adjusted for different growth phases)',
+    metrics_title: 'What the Numbers Mean: Vanilla Orchid Science', card_temp_title: 'Temperature', card_temp_range: '18–24°C (64–75°F)', card_temp_why_title: 'Why It Matters for Vanilla', card_temp_why: 'Vanilla orchids are children of the tropics. They need consistent warmth to trigger growth and flowering. Temperatures below 18°C stall development; above 32°C, the plant enters stress. Our 24.5°C sweet spot accelerates both vegetative growth and the delicate process of flower maturation.', card_temp_growth_title: 'Growth Signal You\'re Watching', card_temp_growth: 'When temperature is stable in the 24–28°C range, vanilla\'s metabolic engines run at peak efficiency. The plant allocates energy to developing the inflorescence (flower spike)—the precursor to our precious vanilla beans.', card_temp_control_title: 'What We Control', card_temp_control_heating: 'Overnight heating (prevents stress from island cool-downs)', card_temp_control_ventilation: 'Daytime ventilation (prevents overheating in summer)', card_temp_control_seasonal: 'Seasonal adjustments (respects flowering cycles)',
+    card_hum_title: 'Humidity', card_hum_range: '65–75% (Relative Humidity)', card_hum_why_title: 'Why It Matters for Vanilla', card_hum_why: 'Humidity is the invisible lifeline of vanilla cultivation. At 72% RH, the air holds enough moisture to satisfy the plant\'s aerial roots (yes, vanilla has roots that absorb water and nutrients from humid air!), while remaining dry enough to prevent fungal diseases that plague tropical orchids.', card_hum_balance_title: 'The Balance', card_hum_balance: 'Below 60% RH, the plant desiccates—a death sentence in a greenhouse. Above 90% RH, fungi take over. The 65–85% window is where vanilla orchids achieve the perfect balance of hydration and disease resistance.', card_hum_growth_title: 'Growth Signal You\'re Watching', card_hum_growth: 'When humidity is stable in the ideal range, vanilla\'s aerial roots remain plump and functional. The plant\'s stomata (breathing pores) open confidently, allowing photosynthesis to proceed at full capacity. This is when growth happens fastest.', card_hum_control_title: 'What We Control', card_hum_control_misting: 'Smart misting systems (supplement humidity during dry periods)', card_hum_control_ventilation: 'Ventilation scheduling (release excess moisture to prevent fungal blooms)', card_hum_control_dew: 'Dew point monitoring (ensures condensation forms strategically, not randomly)', card_hum_control_circulation: 'Air circulation (prevents stagnant pockets where fungi thrive)',
+    card_vpd_title: 'VPD (Vapor Pressure Deficit)', card_vpd_range: '0.4–0.6 kPa (Kilopascals)', card_vpd_what_title: 'What Is VPD? (The Science Behind the Number)', card_vpd_what: 'VPD is the "comfort zone" metric. It measures the difference between the amount of moisture the air can hold (at current temperature) and the amount it actually holds (current humidity). Think of it as the "thirst" of the air.', card_vpd_matters_title: 'Why It Matters for Vanilla', card_vpd_matters: 'VPD directly controls how aggressively a plant transpires (releases water through leaves and aerial roots).', card_vpd_too_low: 'VPD too low (< 0.6 kPa): The air is so humid that the plant can\'t release water. Roots suffocate. Fungi thrive.', card_vpd_too_high: 'VPD too high (> 2.0 kPa): The air is so dry that the plant desperately transpires to cool itself. The plant loses water faster than roots can absorb it—inducing drought stress.', card_vpd_sweet: 'VPD in the sweet spot (0.4–0.6 kPa): The plant transpires at the perfect rate. Nutrients move through the plant efficiently. Growth is maximized. The plant is neither drowning nor gasping.', card_vpd_growth_title: 'Growth Signal You\'re Watching', card_vpd_growth: 'When VPD is 1.2 kPa, the plant is in "active nutrient uptake mode." The transpiration rate is optimal for moving water and dissolved nutrients from the roots to leaves and flowers. This is when the magic happens—when vanilla accumulates the sugars and compounds that will eventually become the vanilla flavor we prize.', card_vpd_investor_title: 'Why Investors Should Care', card_vpd_investor: 'VPD is the proxy for crop efficiency. At 1.2 kPa, our energy input (fans, misters, heaters) achieves maximum plant output. This is the data point that proves our climate control is not just precise—it\'s economical.', card_vpd_control_title: 'What We Control', card_vpd_control_coordination: 'Temperature-humidity coordination (maintaining ideal VPD even as outdoor conditions swing)', card_vpd_control_monitoring: 'Active transpiration monitoring (our sensors trigger interventions before stress occurs)', card_vpd_control_seasonal: 'Seasonal VPD targets (adjusted for different growth phases)',
     current_label: 'Current:', data_explorer_title: 'Detailed Data Explorer', data_explorer_intro: 'Filter by date range to examine specific periods. Researchers can use this data to validate growth correlations, identify stress events, or study our climate control algorithms in action.', data_tip: 'Tip: A negative Dew Point depression (difference between air temp and dew point) indicates the air is approaching saturation—useful for predicting condensation events.',
     transparency_title: 'A Note on Transparency & Open Science', transparency_intro: 'This data represents our current research on optimal conditions for vanilla cultivation. We\'re documenting what works. We don\'t cherry-pick results. Our approach is grounded in observation and measurement—understanding the precise environmental parameters that allow vanilla to thrive in our greenhouses on São Miguel.', transparency_why: 'Because we believe that transparency accelerates innovation. Researchers can validate our methods. Investors can build confidence through evidence, not marketing. Enthusiasts can truly understand what it takes to grow vanilla in the Azores.', transparency_why_bold: 'Why?', transparency_conclusion: 'We\'re not just growing vanilla. We\'re proving that precision agriculture—powered by careful measurement, environmental control, and continuous learning—is the foundation of specialty farming. And we\'re building the infrastructure to share our knowledge as we scale.', transparency_contact_link: 'Contact us',
     // Old stats
@@ -106,13 +256,13 @@ const TRANSLATIONS = {
     contact_title: 'Contacte-nos', contact_intro: 'Aceitamos pedidos sobre visitas, compras e parcerias. Contacte-nos por email, telefone ou redes sociais.', contact_email_label: 'Email:', contact_phone_label: 'Telefone:', contact_address_title: 'Localização', contact_address_label: 'Ribeira Grande (Conceição), São Miguel, Açores', contact_map_note: 'Mapa incorporado via Google Maps — substitua pelo seu fornecedor preferido se necessário.', follow_us_title: 'Siga-nos',
     // Statistics
     dashboard_title: 'Painel de Pesquisa', dashboard_subtitle: 'Monitorização do Comportamento da Estufa e Dados de Desempenho', dashboard_intro_why: 'Em Baunilha dos Açores, acreditamos na ciência aberta. Os dados abaixo representam a nossa pesquisa sobre condições de estufa para o cultivo de baunilha nos Açores. Isto não é apenas uma exibição; é um convite para compreender os nossos métodos.', dashboard_intro_for_researchers: 'Para Pesquisadores: Validem os nossos métodos. Contribuam com insights. Vejam como o controle climático de precisão permite o cultivo de baunilha num clima temperado.', dashboard_intro_for_investors: 'Para Investidores: A transparência constrói confiança. Acompanhem os nossos padrões de dados. Observem como engenhamos um microclima onde as orquídeas de baunilha prosperam—a base da nossa escalabilidade de AgTech.', dashboard_intro_for_enthusiasts: 'Para Entusiastas: Testemunhem a dança delicada do controle ambiental. É assim que se parece dominar a \'zona de conforto\' da baunilha na prática.', dashboard_intro_iot: 'A nossa estufa está equipada com sensores ambientais. Os dados abaixo ilustram as condições que mantemos para a baunilha prosperar nos Açores.',
-    live_conditions_title: 'Condições-Alvo da Estufa', metric_temperature: 'Temperatura', metric_humidity: 'Humidade', metric_vpd: 'VPD', status_optimal: 'Ótimo', status_ideal: 'Ideal', temp_range: '20–30°C', hum_range: '65–85%', vpd_range: '0,8–1,5 kPa',
+    live_conditions_title: 'Condições-Alvo da Estufa', metric_temperature: 'Temperatura', metric_humidity: 'Humidade', metric_vpd: 'VPD', status_optimal: 'Ótimo', status_ideal: 'Ideal', temp_range: '18–24°C', hum_range: '65–75%', vpd_range: '0,4–0,6 kPa',
     plant_status_title: 'Indicadores de Estado da Planta', status_growth_phase: 'Fase de Crescimento Ótima', status_transpiration: 'Transpiração Ativa', status_monitoring: 'Monitorização de Risco de Fungos', status_explanation: 'A estufa está numa janela de crescimento ótima. As condições atuais apoiam a absorção ativa de nutrientes e o desenvolvimento da planta. O VPD é ideal para a função estomatal.', status_updated: 'Com Base em Pesquisa: Dezembro de 2025',
     comparison_title: 'Interior vs. Exterior: A Vantagem Açoriana', comparison_intro: 'A comparação abaixo ilustra por que a nossa conceção de estufa é uma inovação para o cultivo de baunilha nos Açores. No exterior, o clima temperado da ilha é bonito mas insuficiente para a baunilha. No interior, engenhamos os trópicos.', comp_temperature: 'Temperatura', comp_humidity: 'Humidade', comp_vpd: 'VPD', comparison_conclusion: 'Por que isto é Importante: A nossa estufa cria um microclima que as orquídeas de baunilha desejam—engenharia meteorológica de precisão. Estes dados validam a nossa vantagem competitiva: utilizamos a abundância de energia renovável dos Açores para alimentar o controle climático que transforma uma ilha temperada num paraíso de baunilha.',
     trend_title: 'Tendência de 24 Horas: O Ritmo Diário', trend_intro: 'Este gráfico mostra as oscilações naturais que orquestamos. Reparem como a temperatura desce durante a noite (aquecemos para evitar choque) e atinge o pico ao meio-dia (ventilamos para manter o intervalo ideal). A humidade segue o inverso: mais alta quando está mais frio, controlada cuidadosamente durante as horas quentes. O VPD é a nossa bússola verdadeira—ajustamos a temperatura e a humidade em conjunto para manter o VPD no ponto ideal.', chart_note: '[Gráfico interativo em breve — mostrando Temperatura (azul), Humidade (verde), VPD (laranja) em 24 horas]', trend_rhythm: 'Este ritmo espelha o ciclo dia-noite natural que a baunilha espera, mesmo que estejamos a controlar cada variável. Esta é a essência da nossa tecnologia.',
-    metrics_title: 'O Que os Números Significam: Ciência das Orquídeas de Baunilha', card_temp_title: 'Temperatura', card_temp_range: '20–30°C (68–86°F)', card_temp_why_title: 'Por que é Importante para a Baunilha', card_temp_why: 'As orquídeas de baunilha são filhas dos trópicos. Precisam de calor consistente para desencadear o crescimento e a floração. Temperaturas abaixo de 18°C atrasam o desenvolvimento; acima de 32°C, a planta entra em estresse. O nosso ponto ideal de 24,5°C acelera tanto o crescimento vegetativo quanto o processo delicado de maturação da flor.', card_temp_growth_title: 'Sinal de Crescimento que Estão a Observar', card_temp_growth: 'Quando a temperatura é estável na faixa de 24–28°C, os motores metabólicos da baunilha funcionam com eficiência máxima. A planta aloca energia para desenvolver a inflorescência (espiga de flor)—o precursor das nossas preciosas vagens de baunilha.', card_temp_control_title: 'O que Controlamos', card_temp_control_heating: 'Aquecimento noturno (evita estresse do resfriamento noturno dos Açores)', card_temp_control_ventilation: 'Ventilação diurna (evita superaquecimento no verão)', card_temp_control_seasonal: 'Ajustes sazonais (respeita ciclos de floração)',
-    card_hum_title: 'Humidade', card_hum_range: '65–85% (Humidade Relativa)', card_hum_why_title: 'Por que é Importante para a Baunilha', card_hum_why: 'A humidade é a linha de vida invisível do cultivo de baunilha. Em 72% HR, o ar contém humidade suficiente para satisfazer as raízes aéreas da planta (sim, a baunilha tem raízes que absorvem água e nutrientes do ar húmido!), enquanto permanece seco o suficiente para prevenir doenças fúngicas que afligem as orquídeas tropicais.', card_hum_balance_title: 'O Equilíbrio', card_hum_balance: 'Abaixo de 60% HR, a planta desidrata—uma sentença de morte numa estufa. Acima de 90% HR, os fungos assumem o controle. A janela de 65–85% é onde as orquídeas de baunilha alcançam o equilíbrio perfeito entre hidratação e resistência a doenças.', card_hum_growth_title: 'Sinal de Crescimento que Estão a Observar', card_hum_growth: 'Quando a humidade é estável na faixa ideal, as raízes aéreas da baunilha permanecem túrgidas e funcionais. Os estômatos da planta (poros respiratórios) abrem confiantemente, permitindo que a fotossíntese prossiga com capacidade total. É quando o crescimento acontece mais rapidamente.', card_hum_control_title: 'O que Controlamos', card_hum_control_misting: 'Sistemas de nebulização inteligentes (complementam a humidade durante períodos secos)', card_hum_control_ventilation: 'Agendamento de ventilação (libertam humidade excessiva para prevenir proliferação de fungos)', card_hum_control_dew: 'Monitorização do ponto de orvalho (garante que a condensação se forme estrategicamente)', card_hum_control_circulation: 'Circulação de ar (evita bolsas estagnadas onde fungos prosperam)',
-    card_vpd_title: 'VPD (Déficit de Pressão de Vapor)', card_vpd_range: '0,8–1,5 kPa (Quilopascais)', card_vpd_what_title: 'O Que é VPD? (A Ciência Por Trás do Número)', card_vpd_what: 'VPD é a métrica da "zona de conforto". Mede a diferença entre a quantidade de humidade que o ar pode conter (na temperatura atual) e a quantidade que realmente contém (humidade atual). Pense nisso como a "sede" do ar.', card_vpd_matters_title: 'Por que é Importante para a Baunilha', card_vpd_matters: 'VPD controla diretamente quão agressivamente uma planta transpira (liberta água através das folhas e raízes aéreas).', card_vpd_too_low: 'VPD muito baixo (< 0,6 kPa): O ar é tão húmido que a planta não consegue libertar água. As raízes sufocam. Os fungos prosperam.', card_vpd_too_high: 'VPD muito alto (> 2,0 kPa): O ar é tão seco que a planta transpira desesperadamente para se arrefecer. A planta perde água mais rápido do que as raízes conseguem absorver—induzindo estresse de seca.', card_vpd_sweet: 'VPD no ponto ideal (0,8–1,5 kPa): A planta transpira na taxa perfeita. Os nutrientes movem-se através da planta com eficiência. O crescimento é maximizado. A planta não está nem a afogar-se nem a ofegar.', card_vpd_growth_title: 'Sinal de Crescimento que Estão a Observar', card_vpd_growth: 'Quando o VPD é 1,2 kPa, a planta está em "modo de absorção ativa de nutrientes." A taxa de transpiração é ideal para mover água e nutrientes dissolvidos das raízes para folhas e flores. É quando a magia acontece—quando a baunilha acumula os açúcares e compostos que eventualmente se tornarão o sabor de baunilha que valorizamos.', card_vpd_investor_title: 'Por que os Investidores Devem se Importar', card_vpd_investor: 'VPD é o proxy para eficiência de colheita. Em 1,2 kPa, a nossa entrada de energia (ventiladores, nebulizadores, aquecedores) alcança rendimento máximo da planta. Este é o ponto de dados que prova que o nosso controle climático não é apenas preciso—é económico.', card_vpd_control_title: 'O que Controlamos', card_vpd_control_coordination: 'Coordenação temperatura-humidade (mantendo VPD ideal mesmo quando as condições externas variam)', card_vpd_control_monitoring: 'Monitorização de transpiração ativa (os nossos sensores disparam intervenções antes que o estresse ocorra)', card_vpd_control_seasonal: 'Metas VPD sazonais (ajustadas para diferentes fases de crescimento)',
+    metrics_title: 'O Que os Números Significam: Ciência das Orquídeas de Baunilha', card_temp_title: 'Temperatura', card_temp_range: '18–24°C (64–75°F)', card_temp_why_title: 'Por que é Importante para a Baunilha', card_temp_why: 'As orquídeas de baunilha são filhas dos trópicos. Precisam de calor consistente para desencadear o crescimento e a floração. Temperaturas abaixo de 18°C atrasam o desenvolvimento; acima de 32°C, a planta entra em estresse. O nosso ponto ideal de 24,5°C acelera tanto o crescimento vegetativo quanto o processo delicado de maturação da flor.', card_temp_growth_title: 'Sinal de Crescimento que Estão a Observar', card_temp_growth: 'Quando a temperatura é estável na faixa de 24–28°C, os motores metabólicos da baunilha funcionam com eficiência máxima. A planta aloca energia para desenvolver a inflorescência (espiga de flor)—o precursor das nossas preciosas vagens de baunilha.', card_temp_control_title: 'O que Controlamos', card_temp_control_heating: 'Aquecimento noturno (evita estresse do resfriamento noturno dos Açores)', card_temp_control_ventilation: 'Ventilação diurna (evita superaquecimento no verão)', card_temp_control_seasonal: 'Ajustes sazonais (respeita ciclos de floração)',
+    card_hum_title: 'Humidade', card_hum_range: '65–75% (Humidade Relativa)', card_hum_why_title: 'Por que é Importante para a Baunilha', card_hum_why: 'A humidade é a linha de vida invisível do cultivo de baunilha. Em 72% HR, o ar contém humidade suficiente para satisfazer as raízes aéreas da planta (sim, a baunilha tem raízes que absorvem água e nutrientes do ar húmido!), enquanto permanece seco o suficiente para prevenir doenças fúngicas que afligem as orquídeas tropicais.', card_hum_balance_title: 'O Equilíbrio', card_hum_balance: 'Abaixo de 60% HR, a planta desidrata—uma sentença de morte numa estufa. Acima de 90% HR, os fungos assumem o controle. A janela de 65–85% é onde as orquídeas de baunilha alcançam o equilíbrio perfeito entre hidratação e resistência a doenças.', card_hum_growth_title: 'Sinal de Crescimento que Estão a Observar', card_hum_growth: 'Quando a humidade é estável na faixa ideal, as raízes aéreas da baunilha permanecem túrgidas e funcionais. Os estômatos da planta (poros respiratórios) abrem confiantemente, permitindo que a fotossíntese prossiga com capacidade total. É quando o crescimento acontece mais rapidamente.', card_hum_control_title: 'O que Controlamos', card_hum_control_misting: 'Sistemas de nebulização inteligentes (complementam a humidade durante períodos secos)', card_hum_control_ventilation: 'Agendamento de ventilação (libertam humidade excessiva para prevenir proliferação de fungos)', card_hum_control_dew: 'Monitorização do ponto de orvalho (garante que a condensação se forme estrategicamente)', card_hum_control_circulation: 'Circulação de ar (evita bolsas estagnadas onde fungos prosperam)',
+    card_vpd_title: 'VPD (Déficit de Pressão de Vapor)', card_vpd_range: '0,4–0,6 kPa (Quilopascais)', card_vpd_what_title: 'O Que é VPD? (A Ciência Por Trás do Número)', card_vpd_what: 'VPD é a métrica da "zona de conforto". Mede a diferença entre a quantidade de humidade que o ar pode conter (na temperatura atual) e a quantidade que realmente contém (humidade atual). Pense nisso como a "sede" do ar.', card_vpd_matters_title: 'Por que é Importante para a Baunilha', card_vpd_matters: 'VPD controla diretamente quão agressivamente uma planta transpira (liberta água através das folhas e raízes aéreas).', card_vpd_too_low: 'VPD muito baixo (< 0,6 kPa): O ar é tão húmido que a planta não consegue libertar água. As raízes sufocam. Os fungos prosperam.', card_vpd_too_high: 'VPD muito alto (> 2,0 kPa): O ar é tão seco que a planta transpira desesperadamente para se arrefecer. A planta perde água mais rápido do que as raízes conseguem absorver—induzindo estresse de seca.', card_vpd_sweet: 'VPD no ponto ideal (0,4–0,6 kPa): A planta transpira na taxa perfeita. Os nutrientes movem-se através da planta com eficiência. O crescimento é maximizado. A planta não está nem a afogar-se nem a ofegar.', card_vpd_growth_title: 'Sinal de Crescimento que Estão a Observar', card_vpd_growth: 'Quando o VPD é 1,2 kPa, a planta está em "modo de absorção ativa de nutrientes." A taxa de transpiração é ideal para mover água e nutrientes dissolvidos das raízes para folhas e flores. É quando a magia acontece—quando a baunilha acumula os açúcares e compostos que eventualmente se tornarão o sabor de baunilha que valorizamos.', card_vpd_investor_title: 'Por que os Investidores Devem se Importar', card_vpd_investor: 'VPD é o proxy para eficiência de colheita. Em 1,2 kPa, a nossa entrada de energia (ventiladores, nebulizadores, aquecedores) alcança rendimento máximo da planta. Este é o ponto de dados que prova que o nosso controle climático não é apenas preciso—é económico.', card_vpd_control_title: 'O que Controlamos', card_vpd_control_coordination: 'Coordenação temperatura-humidade (mantendo VPD ideal mesmo quando as condições externas variam)', card_vpd_control_monitoring: 'Monitorização de transpiração ativa (os nossos sensores disparam intervenções antes que o estresse ocorra)', card_vpd_control_seasonal: 'Metas VPD sazonais (ajustadas para diferentes fases de crescimento)',
     current_label: 'Atual:', data_explorer_title: 'Explorador de Dados Detalhados', data_explorer_intro: 'Filtrem por intervalo de datas para examinar períodos específicos. Pesquisadores podem usar estes dados para validar correlações de crescimento, identificar eventos de estresse ou estudar os nossos algoritmos de controle climático em ação.', data_tip: 'Dica: Uma depressão de ponto de orvalho negativa (diferença entre temp. do ar e ponto de orvalho) indica que o ar está a aproximar-se da saturação—útil para prever eventos de condensação.',
     transparency_title: 'Uma Nota sobre Transparência & Ciência Aberta', transparency_intro: 'Estes dados representam a nossa pesquisa atual sobre condições ótimas para o cultivo de baunilha. Estamos a documentar o que funciona. Não escolhemos seletivamente resultados. A nossa abordagem é baseada em observação e medição—compreendendo os parâmetros ambientais precisos que permitem à baunilha prosperar nas nossas estufas em São Miguel.', transparency_why: 'Porque acreditamos que a transparência acelera a inovação. Os pesquisadores podem validar os nossos métodos. Os investidores podem construir confiança através de evidências, não de marketing. Os entusiastas podem realmente compreender o que é necessário para cultivar baunilha nos Açores.', transparency_why_bold: 'Por quê?', transparency_conclusion: 'Não estamos apenas a cultivar baunilha. Estamos a provar que a agricultura de precisão—alimentada por medição cuidadosa, controle ambiental e aprendizagem contínua—é a base da agricultura de especialidade. E estamos a construir a infraestrutura para compartilhar o nosso conhecimento conforme escalamos.', transparency_contact_link: 'Entre em contacto',
     // Old stats
@@ -196,19 +346,37 @@ function setupDelegatedHandlers(){
 
 /* ----------------------------- stats ----------------------------- */
 function parseDate(dateStr){
-  const parts = dateStr.trim().split(' ');
+  const trimmed = dateStr.trim();
+  
+  // Try new format first: "YYYY-MM-DD HH:MM:SS"
+  if(trimmed.includes('-') && trimmed.includes(':') && !trimmed.includes('a.m') && !trimmed.includes('p.m')) {
+    try {
+      const [datePart, timePart] = trimmed.split(' ');
+      const [year, month, day] = datePart.split('-');
+      const [hours, minutes, seconds] = timePart.split(':');
+      return new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(hours), parseInt(minutes), parseInt(seconds));
+    } catch(e) {
+      return null;
+    }
+  }
+  
+  // Fall back to old format: "MM-DD-YYYY HH:MM:SS p.m./a.m."
+  const parts = trimmed.split(' ');
   if(parts.length < 3) return null;
   
   const [month, day, year] = parts[0].split('-');
   const [hours, minutes, seconds] = parts[1].split(':');
-  const ampm = parts[2];
+  let ampm = parts[2];
+  
+  // Remove period from am/pm (e.g., 'p.m.' -> 'pm')
+  ampm = ampm.replace(/\./g, '');
   
   let h = parseInt(hours);
   const m = parseInt(minutes);
   const s = parseInt(seconds);
   
-  if(ampm.toLowerCase() === 'p.m.' && h !== 12) h += 12;
-  if(ampm.toLowerCase() === 'a.m.' && h === 12) h = 0;
+  if(ampm.toLowerCase().startsWith('p') && h !== 12) h += 12;
+  if(ampm.toLowerCase().startsWith('a') && h === 12) h = 0;
   
   return new Date(parseInt(year), parseInt(month) - 1, parseInt(day), h, m, s);
 }
@@ -221,12 +389,23 @@ function parseCSV(csvText){
   const data = [];
   for(let i = 1; i < lines.length; i++){
     if(!lines[i].trim()) continue;
-    const values = lines[i].split('\t');
+    // Try comma first (new format), fall back to tab (old format)
+    let values = lines[i].split(',');
+    if(values.length < 5) {
+      values = lines[i].split('\t');
+    }
     if(values.length < 5) continue;
     
+    // Handle both old 5-column and new 6-column format
+    let row = values.map(v => v.trim());
+    if(row.length === 5) {
+      // Old format: add 'greenhouse' as location
+      row = [row[0], 'greenhouse', row[1], row[2], row[4], row[3]];
+    }
+    
     data.push({
-      _values: values,
-      _date: parseDate(values[0])
+      _values: row,
+      _date: parseDate(row[0])
     });
   }
   return data;
@@ -238,7 +417,8 @@ function renderRows(data){
   tbody.innerHTML = '';
   data.forEach(row => {
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${row._values[0]}</td><td>${row._values[1]}</td><td>${row._values[2]}</td><td>${row._values[4]}</td><td>${row._values[3]}</td>`;
+    // Format: timestamp, location, temp, humidity, vpd, dew_point
+    tr.innerHTML = `<td>${row._values[0]}</td><td>${row._values[1]}</td><td>${row._values[2]}</td><td>${row._values[3]}</td><td>${row._values[4]}</td><td>${row._values[5]}</td>`;
     tbody.appendChild(tr);
   });
 }
@@ -258,15 +438,18 @@ async function loadStats(){
     const data = parseCSV(csvText);
     window.__stats = data;
     
-    // Show last 48 hours (24 rows at 5-min intervals)
-    const last24h = data.slice(-24);
+    // Filter to greenhouse by default
+    const greenhouse = data.filter(r => r._values[1] === 'greenhouse');
+    
+    // Show last 24 rows from greenhouse data
+    const last24h = greenhouse.slice(-24);
     renderRows(last24h);
     
-    // Update dashboard with latest data
-    if(data.length > 0) {
-      const latest = data[data.length - 1];
-      const temp = parseFloat(latest._values[1]);
-      const humidity = parseFloat(latest._values[2]);
+    // Update dashboard with latest greenhouse data
+    if(greenhouse.length > 0) {
+      const latest = greenhouse[greenhouse.length - 1];
+      const temp = parseFloat(latest._values[2]);
+      const humidity = parseFloat(latest._values[3]);
       const vpd = parseFloat(latest._values[4]);
       
       // Update live conditions
@@ -284,9 +467,34 @@ async function loadStats(){
       updateGaugeStatus(temp, humidity, vpd);
       updateMetricCards(temp, humidity, vpd);
       
-      // Update charts with last 24 rows
-      const chartData = generateChartData(data);
+      // Update charts with last 24 rows from greenhouse
+      const chartData = generateChartData(greenhouse);
       updateCharts(chartData);
+    }
+    
+    // Update outdoor data
+    const outdoor = data.filter(r => r._values[1] === 'outdoor');
+    if(outdoor.length > 0) {
+      const latestOutdoor = outdoor[outdoor.length - 1];
+      const outTemp = parseFloat(latestOutdoor._values[2]);
+      const outHumidity = parseFloat(latestOutdoor._values[3]);
+      const outVpd = parseFloat(latestOutdoor._values[4]);
+      
+      // Update outdoor conditions display
+      const outTempEl = q('#outdoor-temp');
+      const outHumEl = q('#outdoor-hum');
+      const outVpdEl = q('#outdoor-vpd');
+      
+      if(outTempEl) outTempEl.textContent = outTemp.toFixed(1);
+      if(outHumEl) outHumEl.textContent = outHumidity.toFixed(0);
+      if(outVpdEl) outVpdEl.textContent = outVpd.toFixed(2);
+      
+      // Update outdoor status and gauges
+      updateOutdoorGaugeStatus(outTemp, outHumidity, outVpd);
+      updateOutdoorPlantStatus(outTemp, outHumidity, outVpd);
+      
+      // Update comparison table with outdoor data
+      updateComparisonTableOutdoor(outTemp, outHumidity, outVpd);
     }
   }catch(e){ 
     console.error('Error loading stats:', e); 
@@ -294,18 +502,22 @@ async function loadStats(){
 }
 
 function updateComparisonTableWithStatus(temp, humidity, vpd){
-  // Determine status and arrow/checkmark based on optimal ranges
-  // Temperature: optimal 24-28°C
-  const tempStatus = temp >= 24 && temp <= 28 ? 'good' : (temp < 20 || temp > 32 ? 'critical' : 'warning');
-  const tempMark = temp >= 24 && temp <= 28 ? '✓' : (temp < 24 ? '↓' : '↑');
+  const { name, policy } = getCurrentPolicy();
+  const vpdTol = getVpdTolerance(policy);
   
-  // Humidity: optimal 65-85%
-  const humStatus = humidity >= 65 && humidity <= 85 ? 'good' : (humidity < 60 || humidity >= 90 ? 'critical' : 'warning');
-  const humMark = humidity >= 65 && humidity <= 85 ? '✓' : (humidity < 65 ? '↓' : '↑');
+  // Determine status based on policy ranges
+  const tempInRange = temp >= policy.t_min && temp <= policy.t_max;
+  const humInRange = humidity >= policy.h_min && humidity <= policy.h_max;
+  const vpdInRange = vpd >= (policy.dv - vpdTol) && vpd <= (policy.dv + vpdTol);
   
-  // VPD: optimal 0.8-1.5 kPa
-  const vpdStatus = vpd >= 0.8 && vpd <= 1.5 ? 'good' : (vpd < 0.5 || vpd >= 2.0 ? 'critical' : 'warning');
-  const vpdMark = vpd >= 0.8 && vpd <= 1.5 ? '✓' : (vpd < 0.8 ? '↓' : '↑');
+  const tempStatus = tempInRange ? 'good' : (Math.abs(temp - policy.t_min) < 2 ? 'warning' : 'critical');
+  const tempMark = tempInRange ? '✓' : (temp < policy.t_min ? '↓' : '↑');
+  
+  const humStatus = humInRange ? 'good' : (Math.abs(humidity - policy.h_min) < 5 ? 'warning' : 'critical');
+  const humMark = humInRange ? '✓' : (humidity < policy.h_min ? '↓' : '↑');
+  
+  const vpdStatus = vpdInRange ? 'good' : (Math.abs(vpd - policy.dv) < vpdTol * 1.5 ? 'warning' : 'critical');
+  const vpdMark = vpdInRange ? '✓' : (vpd < policy.dv ? '↓' : '↑');
   
   // Update comparison table cells
   const tempCell = q('#comp-temp-inside');
@@ -327,25 +539,38 @@ function updateComparisonTableWithStatus(temp, humidity, vpd){
 }
 
 function calculateStatus(temp, humidity, vpd){
-  const optimalTemp = temp >= 24 && temp <= 28;
-  const optimalHum = humidity >= 65 && humidity <= 85;
-  const optimalVpd = vpd >= 0.8 && vpd <= 1.5;
+  const { name, policy } = getCurrentPolicy();
+  const vpdTol = getVpdTolerance(policy);
   
-  let growthStatus = optimalTemp ? 'good' : (temp < 20 || temp > 32 ? 'critical' : 'warning');
+  // Check if values are within policy ranges
+  const optimalTemp = temp >= policy.t_min && temp <= policy.t_max;
+  const optimalHum = humidity >= policy.h_min && humidity <= policy.h_max;
+  const optimalVpd = vpd >= (policy.dv - vpdTol) && vpd <= (policy.dv + vpdTol);
   
-  // Transpiration requires both humidity AND VPD to be optimal
+  // Growth phase status (based on temperature and policy)
+  let growthStatus = optimalTemp ? 'good' : (Math.abs(temp - policy.t_min) < 2 || Math.abs(temp - policy.t_max) < 2 ? 'warning' : 'critical');
+  
+  // Transpiration status (requires humidity AND VPD to be within policy)
   let transpirationStatus = 'good';
   if(!optimalHum || !optimalVpd) {
-    if((humidity < 60 || humidity > 90) || (vpd < 0.5 || vpd > 2.0)) {
+    const humCritical = humidity < (policy.h_min - 5) || humidity > (policy.h_max + 5);
+    const vpdCritical = vpd < (policy.dv - vpdTol * 2) || vpd > (policy.dv + vpdTol * 2);
+    if(humCritical || vpdCritical) {
       transpirationStatus = 'critical';
     } else {
       transpirationStatus = 'warning';
     }
   }
   
-  let fungusRisk = humidity > 85 && temp > 25 ? 'critical' : (humidity > 80 ? 'warning' : 'good');
+  // Fungus risk (high humidity + warm temp = ideal for fungi)
+  let fungusRisk = 'good';
+  if(humidity > 85 && temp > policy.t_max - 3) {
+    fungusRisk = 'critical';
+  } else if(humidity > policy.h_max) {
+    fungusRisk = 'warning';
+  }
   
-  return { growthStatus, transpirationStatus, fungusRisk };
+  return { growthStatus, transpirationStatus, fungusRisk, policyName: name };
 }
 
 function getStatusIcon(status){
@@ -378,19 +603,30 @@ function updatePlantStatus(temp, humidity, vpd){
 }
 
 function updateGaugeStatus(temp, humidity, vpd){
-  // Update gauge status labels based on actual values
-  const tempStatus = temp >= 24 && temp <= 28 ? 'Optimal' : (temp < 20 || temp > 32 ? 'Critical' : 'Caution');
-  const humStatus = humidity >= 65 && humidity <= 85 ? 'Optimal' : (humidity < 60 || humidity >= 90 ? 'Critical' : 'Caution');
-  const vpdStatus = vpd >= 0.8 && vpd <= 1.5 ? 'Ideal' : (vpd < 0.5 || vpd >= 2.0 ? 'Critical' : 'Caution');
+  // Get current policy based on season
+  const { name, policy } = getCurrentPolicy();
+  
+  // Determine status based on policy ranges
+  const tempInRange = temp >= policy.t_min && temp <= policy.t_max;
+  const humInRange = humidity >= policy.h_min && humidity <= policy.h_max;
+  
+  // VPD check: use appropriate tolerance based on day/night
+  const targetVpd = policy.dv;
+  const vpdTol = getVpdTolerance(policy);
+  const isDay = isDaylight();
+  const vpdInRange = vpd >= (targetVpd - vpdTol) && vpd <= (targetVpd + vpdTol);
+  
+  const tempStatus = tempInRange ? 'Optimal' : (Math.abs(temp - policy.t_min) < 2 || Math.abs(temp - policy.t_max) < 2 ? 'Caution' : 'Critical');
+  const humStatus = humInRange ? 'Optimal' : (Math.abs(humidity - policy.h_min) < 5 || Math.abs(humidity - policy.h_max) < 5 ? 'Caution' : 'Critical');
+  const vpdStatus = vpdInRange ? 'Ideal' : (Math.abs(vpd - targetVpd) < vpdTol * 1.5 ? 'Caution' : 'Critical');
   
   const tempEl = q('#gauge-temp-status');
   const humEl = q('#gauge-hum-status');
   const vpdEl = q('#gauge-vpd-status');
   
-  // Determine status colors
-  const tempClass = temp >= 24 && temp <= 28 ? 'good' : (temp < 20 || temp > 32 ? 'critical' : 'warning');
-  const humClass = humidity >= 65 && humidity <= 85 ? 'good' : (humidity < 60 || humidity >= 90 ? 'critical' : 'warning');
-  const vpdClass = vpd >= 0.8 && vpd <= 1.5 ? 'good' : (vpd < 0.5 || vpd >= 2.0 ? 'critical' : 'warning');
+  const tempClass = tempInRange ? 'good' : (tempStatus === 'Caution' ? 'warning' : 'critical');
+  const humClass = humInRange ? 'good' : (humStatus === 'Caution' ? 'warning' : 'critical');
+  const vpdClass = vpdInRange ? 'good' : (vpdStatus === 'Caution' ? 'warning' : 'critical');
   
   if(tempEl) {
     tempEl.textContent = tempStatus;
@@ -403,6 +639,32 @@ function updateGaugeStatus(temp, humidity, vpd){
   if(vpdEl) {
     vpdEl.textContent = vpdStatus;
     vpdEl.className = 'gauge-status ' + vpdClass;
+  }
+  
+  // Update policy-based ranges displayed in the gauge cards
+  updateGaugeRanges(policy);
+}
+
+function updateGaugeRanges(policy){
+  // Update displayed ranges in Target Greenhouse Conditions section
+  const gaugeCards = qAll('.gauge-card');
+  if(gaugeCards.length >= 3) {
+    const tempRange = gaugeCards[0].querySelector('.gauge-range');
+    const humRange = gaugeCards[1].querySelector('.gauge-range');
+    const vpdRange = gaugeCards[2].querySelector('.gauge-range');
+    
+    if(tempRange) {
+      tempRange.textContent = policy.t_min + '–' + policy.t_max + '°C';
+    }
+    if(humRange) {
+      humRange.textContent = policy.h_min + '–' + policy.h_max + '%';
+    }
+    if(vpdRange) {
+      const vpdTol = getVpdTolerance(policy);
+      const vpdMin = (policy.dv - vpdTol).toFixed(2);
+      const vpdMax = (policy.dv + vpdTol).toFixed(2);
+      vpdRange.textContent = vpdMin + '–' + vpdMax + ' kPa';
+    }
   }
 }
 
@@ -418,31 +680,60 @@ function updateMetricCards(temp, humidity, vpd){
 }
 
 function generateChartData(dataRows){
-  const last24 = dataRows.slice(-24);
-  return last24.map(row => ({
-    temp: parseFloat(row._values[1]),
-    humidity: parseFloat(row._values[2]),
-    vpd: parseFloat(row._values[4])
+  // Filter data to last 24 hours (by timestamp, not row count)
+  if(dataRows.length === 0) return [];
+  
+  // Get the latest timestamp
+  const latestRow = dataRows[dataRows.length - 1];
+  if(!latestRow || !latestRow._date) return [];
+  
+  const latestTime = latestRow._date.getTime();
+  const oneDayMs = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+  const cutoffTime = latestTime - oneDayMs;
+  
+  // Filter rows from the last 24 hours
+  const last24h = dataRows.filter(row => {
+    if(!row._date) return false;
+    return row._date.getTime() >= cutoffTime;
+  });
+  
+  console.log(`📊 Chart data: ${last24h.length} points from last 24 hours (${last24h.length > 0 ? 'approx ' + Math.round(last24h.length / 12) + ' readings per hour' : 'no data'})`);
+  
+  return last24h.map(row => ({
+    temp: parseFloat(row._values[2]),
+    humidity: parseFloat(row._values[3]),
+    vpd: parseFloat(row._values[4]),
+    timestamp: row._values[0]
   }));
 }
 
 function updateCharts(chartData){
-  if(!chartData || chartData.length < 2) return;
+  if(!chartData || chartData.length < 1) return;
   
   const charts = qAll('svg.metric-chart');
   if(charts.length < 3) return;
+  
+  // Calculate X positions based on actual number of data points (spread across 820px width)
+  const dataPoints = chartData.length;
+  const xStep = dataPoints > 1 ? 820 / (dataPoints - 1) : 0;
+  
+  console.log(`📈 Rendering ${dataPoints} data points on charts (${(xStep).toFixed(2)}px per point)`);
   
   // Temperature chart
   const tempPoly = charts[0].querySelector('polyline');
   if(tempPoly) {
     let points = '';
     const minT = 14, maxT = 32;
+    const range = maxT - minT;
+    
     chartData.forEach((d, i) => {
-      const x = 40 + (i / (chartData.length - 1)) * 820;
-      const y = 230 - ((d.temp - minT) / (maxT - minT)) * 200;
+      const x = 40 + (i * xStep);
+      const normalized = Math.max(0, Math.min(1, (d.temp - minT) / range));
+      const y = 230 - (normalized * 200);
       points += x + ',' + y + ' ';
     });
-    tempPoly.setAttribute('points', points);
+    tempPoly.setAttribute('points', points.trim());
+    console.log('✓ Temperature chart updated with ' + dataPoints + ' points');
   }
   
   // Humidity chart
@@ -450,12 +741,16 @@ function updateCharts(chartData){
   if(humPoly) {
     let points = '';
     const minH = 50, maxH = 95;
+    const range = maxH - minH;
+    
     chartData.forEach((d, i) => {
-      const x = 40 + (i / (chartData.length - 1)) * 820;
-      const y = 230 - ((d.humidity - minH) / (maxH - minH)) * 200;
+      const x = 40 + (i * xStep);
+      const normalized = Math.max(0, Math.min(1, (d.humidity - minH) / range));
+      const y = 230 - (normalized * 200);
       points += x + ',' + y + ' ';
     });
-    humPoly.setAttribute('points', points);
+    humPoly.setAttribute('points', points.trim());
+    console.log('✓ Humidity chart updated with ' + dataPoints + ' points');
   }
   
   // VPD chart
@@ -463,12 +758,122 @@ function updateCharts(chartData){
   if(vpdPoly) {
     let points = '';
     const minV = 0, maxV = 2.5;
+    const range = maxV - minV;
+    
     chartData.forEach((d, i) => {
-      const x = 40 + (i / (chartData.length - 1)) * 820;
-      const y = 200 - ((d.vpd - minV) / (maxV - minV)) * 180;
+      const x = 40 + (i * xStep);
+      const normalized = Math.max(0, Math.min(1, (d.vpd - minV) / range));
+      const y = 200 - (normalized * 180);
       points += x + ',' + y + ' ';
     });
-    vpdPoly.setAttribute('points', points);
+    vpdPoly.setAttribute('points', points.trim());
+    console.log('✓ VPD chart updated with ' + dataPoints + ' points');
+  }
+}
+
+function updateOutdoorGaugeStatus(temp, humidity, vpd){
+  // Get current policy for comparison
+  const { name, policy } = getCurrentPolicy();
+  const vpdTol = getVpdTolerance(policy);
+  
+  // Update outdoor gauge status labels - compare against policy ranges
+  const tempInPolicy = temp >= policy.t_min && temp <= policy.t_max;
+  const humInPolicy = humidity >= policy.h_min && humidity <= policy.h_max;
+  const vpdInPolicy = vpd >= (policy.dv - vpdTol) && vpd <= (policy.dv + vpdTol);
+  
+  const tempStatus = tempInPolicy ? 'Within Policy' : (temp < policy.t_min ? 'Below Min' : 'Above Max');
+  const humStatus = humInPolicy ? 'Within Policy' : (humidity < policy.h_min ? 'Too Dry' : 'Too Humid');
+  const vpdStatus = vpdInPolicy ? 'Within Policy' : (vpd < policy.dv - vpdTol ? 'Too Low' : 'Too High');
+  
+  const tempEl = q('#gauge-outdoor-temp-status');
+  const humEl = q('#gauge-outdoor-hum-status');
+  const vpdEl = q('#gauge-outdoor-vpd-status');
+  
+  // Determine status colors
+  const tempClass = tempInPolicy ? 'good' : (Math.abs(temp - policy.t_min) < 3 || Math.abs(temp - policy.t_max) < 3 ? 'warning' : 'critical');
+  const humClass = humInPolicy ? 'good' : (Math.abs(humidity - policy.h_min) < 5 || Math.abs(humidity - policy.h_max) < 5 ? 'warning' : 'critical');
+  const vpdClass = vpdInPolicy ? 'good' : (Math.abs(vpd - policy.dv) < vpdTol * 1.5 ? 'warning' : 'critical');
+  
+  if(tempEl) {
+    tempEl.textContent = tempStatus;
+    tempEl.className = 'gauge-status ' + tempClass;
+  }
+  if(humEl) {
+    humEl.textContent = humStatus;
+    humEl.className = 'gauge-status ' + humClass;
+  }
+  if(vpdEl) {
+    vpdEl.textContent = vpdStatus;
+    vpdEl.className = 'gauge-status ' + vpdClass;
+  }
+}
+
+function updateOutdoorPlantStatus(temp, humidity, vpd){
+  // Update outdoor plant status display
+  const display = q('#outdoor-status-display');
+  if(!display) return;
+  
+  let html = '';
+  
+  // Assess temperature
+  if(temp < 18) {
+    html += '<div class="status-item status-critical"><span class="status-icon">🔴</span><span class="status-text">Too Cold (' + temp.toFixed(1) + '°C) for Vanilla</span></div>';
+  } else if(temp < 20) {
+    html += '<div class="status-item status-warning"><span class="status-icon">🟡</span><span class="status-text">Cold Stress (' + temp.toFixed(1) + '°C)</span></div>';
+  } else if(temp > 32) {
+    html += '<div class="status-item status-critical"><span class="status-icon">🔴</span><span class="status-text">Too Hot (' + temp.toFixed(1) + '°C)</span></div>';
+  }
+  
+  // Assess VPD
+  if(vpd > 2.0) {
+    html += '<div class="status-item status-critical"><span class="status-icon">🔴</span><span class="status-text">Extreme VPD Stress (' + vpd.toFixed(2) + ' kPa)</span></div>';
+  } else if(vpd > 1.5) {
+    html += '<div class="status-item status-warning"><span class="status-icon">🟡</span><span class="status-text">High VPD (' + vpd.toFixed(2) + ' kPa)</span></div>';
+  }
+  
+  // Assess overall viability
+  if(temp < 18 || vpd > 2.0) {
+    html += '<div class="status-item status-critical"><span class="status-icon">🔴</span><span class="status-text">Outdoor Growth Not Viable</span></div>';
+  } else {
+    html += '<div class="status-item status-warning"><span class="status-icon">🟡</span><span class="status-text">Greenhouse Engineering Required</span></div>';
+  }
+  
+  display.innerHTML = html;
+}
+
+function updateComparisonTableOutdoor(temp, humidity, vpd){
+  // Get current policy for comparison
+  const { name, policy } = getCurrentPolicy();
+  const vpdTol = getVpdTolerance(policy);
+  
+  // Update the comparison table with actual outdoor values - compare against policy
+  const compTempOutside = q('#comp-temp-outside');
+  const compHumOutside = q('#comp-hum-outside');
+  const compVpdOutside = q('#comp-vpd-outside');
+  
+  const tempInPolicy = temp >= policy.t_min && temp <= policy.t_max;
+  const humInPolicy = humidity >= policy.h_min && humidity <= policy.h_max;
+  const vpdInPolicy = vpd >= (policy.dv - vpdTol) && vpd <= (policy.dv + vpdTol);
+  
+  if(compTempOutside) {
+    const tempStatus = tempInPolicy ? 'good' : (Math.abs(temp - policy.t_min) < 3 || Math.abs(temp - policy.t_max) < 3 ? 'warning' : 'critical');
+    const badge = temp < policy.t_min ? '↓' : (temp > policy.t_max ? '↑' : '→');
+    compTempOutside.className = 'comparison-cell outside ' + tempStatus;
+    compTempOutside.innerHTML = temp.toFixed(1) + '°C <span class="badge">' + badge + '</span>';
+  }
+  
+  if(compHumOutside) {
+    const humStatus = humInPolicy ? 'good' : (Math.abs(humidity - policy.h_min) < 5 || Math.abs(humidity - policy.h_max) < 5 ? 'warning' : 'critical');
+    const badge = humidity < policy.h_min ? '↓' : (humidity > policy.h_max ? '↑' : '→');
+    compHumOutside.className = 'comparison-cell outside ' + humStatus;
+    compHumOutside.innerHTML = humidity.toFixed(0) + '% <span class="badge">' + badge + '</span>';
+  }
+  
+  if(compVpdOutside) {
+    const vpdStatus = vpdInPolicy ? 'good' : (Math.abs(vpd - policy.dv) < vpdTol * 1.5 ? 'warning' : 'critical');
+    const badge = vpd < (policy.dv - vpdTol) ? '↓' : (vpd > (policy.dv + vpdTol) ? '↑' : '→');
+    compVpdOutside.className = 'comparison-cell outside ' + vpdStatus;
+    compVpdOutside.innerHTML = vpd.toFixed(2) + ' kPa <span class="badge">' + badge + '</span>';
   }
 }
 
@@ -477,30 +882,37 @@ function applyFilter(){
   
   const fromInput = q('#from');
   const toInput = q('#to');
+  const locationSelect = q('#location-filter');
+  const selectedLocation = locationSelect?.value || 'greenhouse';
   
-  if(!fromInput?.value || !toInput?.value) {
-    showMessage('Please select both from and to dates');
-    return;
+  // If no dates are set, use all data filtered by location
+  let filtered = window.__stats;
+  
+  if(fromInput?.value && toInput?.value) {
+    const from = new Date(fromInput.value + 'T00:00:00');
+    const to = new Date(toInput.value + 'T23:59:59');
+    
+    // Check if range is more than 2 days
+    const diffDays = (to - from) / (1000 * 60 * 60 * 24);
+    if(diffDays > 2) {
+      showMessage('❌ Maximum 2 days per request. Please select up to 2 days.');
+      return;
+    }
+    
+    // Filter data for date range
+    filtered = filtered.filter(r => {
+      if(!r._date) return false;
+      return r._date >= from && r._date <= to;
+    });
   }
   
-  const from = new Date(fromInput.value + 'T00:00:00');
-  const to = new Date(toInput.value + 'T23:59:59');
-  
-  // Check if range is more than 2 days
-  const diffDays = (to - from) / (1000 * 60 * 60 * 24);
-  if(diffDays > 2) {
-    showMessage('❌ Maximum 2 days per request. Please select up to 2 days.');
-    return;
+  // Filter by location
+  if(selectedLocation !== 'both') {
+    filtered = filtered.filter(r => r._values[1] === selectedLocation);
   }
-  
-  // Filter data for date range
-  const filtered = window.__stats.filter(r => {
-    if(!r._date) return false;
-    return r._date >= from && r._date <= to;
-  });
   
   if(filtered.length === 0) {
-    showMessage('⚠️ No data available for selected dates');
+    showMessage('⚠️ No data available for selected filters');
     return;
   }
   
@@ -509,8 +921,8 @@ function applyFilter(){
   // Update status and charts based on filtered data
   if(filtered.length > 0) {
     const latest = filtered[filtered.length - 1];
-    const temp = parseFloat(latest._values[1]);
-    const humidity = parseFloat(latest._values[2]);
+    const temp = parseFloat(latest._values[2]);
+    const humidity = parseFloat(latest._values[3]);
     const vpd = parseFloat(latest._values[4]);
     updatePlantStatus(temp, humidity, vpd);
     updateGaugeStatus(temp, humidity, vpd);
@@ -593,14 +1005,27 @@ document.addEventListener('DOMContentLoaded', () => {
   // stats controls
   const applyBtn = q('#apply');
   const resetBtn = q('#reset');
+  const locationSelect = q('#location-filter');
   if(applyBtn) applyBtn.addEventListener('click', applyFilter);
+  if(locationSelect) locationSelect.addEventListener('change', applyFilter);
   if(resetBtn) resetBtn.addEventListener('click', () => {
     const fromInput = q('#from'); if(fromInput) fromInput.value = '';
     const toInput = q('#to'); if(toInput) toInput.value = '';
-    if(window.__stats) renderRows(window.__stats.slice(-24));
+    if(locationSelect) locationSelect.value = 'greenhouse';
+    if(window.__stats) {
+      const greenhouse = window.__stats.filter(r => r._values[1] === 'greenhouse');
+      renderRows(greenhouse.slice(-24));
+    }
   });
 
   loadStats();
+  
+  // Update metric cards AFTER initial translation setup completes
+  // This ensures the dynamic day/night VPD values aren't overwritten by static translations
+  setTimeout(() => {
+    updateMetricCardRanges();
+    updateChartLabels();
+  }, 1300); // Wait for retryTimer to finish (max 1200ms) + buffer
 });
 
 // banner removed
