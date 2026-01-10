@@ -355,8 +355,10 @@ function parseDate(dateStr){
       const [datePart, timePart] = trimmed.split(' ');
       const [year, month, day] = datePart.split('-');
       const [hours, minutes, seconds] = timePart.split(':');
-      return new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(hours), parseInt(minutes), parseInt(seconds));
+      const parsed = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(hours), parseInt(minutes), parseInt(seconds));
+      return parsed;
     } catch(e) {
+      console.error('parseDate error for', dateStr, e);
       return null;
     }
   }
@@ -693,11 +695,18 @@ function generateChartData(dataRows){
   const oneDayMs = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
   const cutoffTime = latestTime - oneDayMs;
   
+  console.log(`📊 generateChartData: Latest time = ${latestRow._date.toString()}`);
+  console.log(`📊 generateChartData: Cutoff time = ${new Date(cutoffTime).toString()}`);
+  
   // Filter rows from the last 24 hours
   const last24h = dataRows.filter(row => {
     if(!row._date) return false;
     return row._date.getTime() >= cutoffTime;
   });
+  
+  if(last24h.length > 0) {
+    console.log(`📊 Filtered data: first = ${last24h[0]._values[0]}, last = ${last24h[last24h.length - 1]._values[0]}`);
+  }
   
   console.log(`📊 Chart data: ${last24h.length} points from last 24 hours (${last24h.length > 0 ? 'approx ' + Math.round(last24h.length / 12) + ' readings per hour' : 'no data'})`);
   
@@ -768,96 +777,119 @@ function updateChartTimeLabels(chartData) {
 }
 
 function updateCharts(chartData){
-  if(!chartData || chartData.length < 1) return;
-  
-  const charts = qAll('svg.metric-chart');
-  if(charts.length < 3) return;
-  
-  // Get exact first and last timestamps
-  const firstDate = parseDate(chartData[0].timestamp);
-  const lastDate = parseDate(chartData[chartData.length - 1].timestamp);
-  const timeSpanMs = lastDate.getTime() - firstDate.getTime();
-  
-  console.log(`📈 Rendering ${chartData.length} points from ${firstDate.toLocaleTimeString()} to ${lastDate.toLocaleTimeString()}`);
-  console.log(`📈 First timestamp: ${chartData[0].timestamp}, Last timestamp: ${chartData[chartData.length - 1].timestamp}`);
-  
-  // Calculate position mapping: x goes from 50 to 870 (820px available)
-  const xMin = 50;
-  const xMax = 870;
-  const xRange = xMax - xMin;
-  
-  // Helper function to calculate X position from exact timestamp
-  function getXFromTimestamp(timestamp) {
-    const pointDate = parseDate(timestamp);
-    const pointMs = pointDate.getTime();
-    const msFromStart = pointMs - firstDate.getTime();
-    
-    // Prevent negative values or overflow
-    if(msFromStart < 0) return xMin;
-    if(msFromStart > timeSpanMs) return xMax;
-    
-    // Map to percentage of time span, then to x coordinate
-    const fraction = timeSpanMs > 0 ? msFromStart / timeSpanMs : 0;
-    const x = xMin + (fraction * xRange);
-    return x;
+  if(!chartData || chartData.length < 1) {
+    console.warn('No chart data to render');
+    return;
   }
-  
-  // Temperature chart
-  const tempPoly = charts[0].querySelector('polyline');
-  if(tempPoly) {
-    let points = '';
-    const minT = 14, maxT = 32;
-    const range = maxT - minT;
-    
-    let minX = Infinity, maxX = -Infinity;
-    chartData.forEach((d, idx) => {
-      const x = getXFromTimestamp(d.timestamp);
-      minX = Math.min(minX, x);
-      maxX = Math.max(maxX, x);
-      if(idx === 0 || idx === chartData.length - 1) {
-        console.log(`Point ${idx}: timestamp=${d.timestamp}, x=${x.toFixed(1)}`);
+
+  // ===== CHART RENDERING ENGINE =====
+  class ChartRenderer {
+    constructor(polylineElement, dataKey = 'temp', minVal = 14, maxVal = 32) {
+      this.polyline = polylineElement;
+      this.dataKey = dataKey;
+      this.minVal = minVal;
+      this.maxVal = maxVal;
+      
+      // Fixed chart dimensions
+      this.xMin = 50;
+      this.xMax = 870;
+      this.yTop = 20;
+      this.yBottom = 200;
+      this.xRange = this.xMax - this.xMin;
+      this.yRange = this.yBottom - this.yTop;
+    }
+
+    parseDate(timeStr) {
+      if (!timeStr) return null;
+      const parts = timeStr.match(/(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2}):(\d{2})/);
+      if (!parts) return null;
+      return new Date(parts[1], parts[2] - 1, parts[3], parts[4], parts[5], parts[6]);
+    }
+
+    render(data) {
+      if (!data || data.length < 1) return false;
+
+      try {
+        const firstDate = this.parseDate(data[0].timestamp);
+        const lastDate = this.parseDate(data[data.length - 1].timestamp);
+        
+        if (!firstDate || !lastDate) return false;
+
+        const timeSpanMs = lastDate.getTime() - firstDate.getTime();
+        if (timeSpanMs <= 0) return false;
+
+        // Find actual data range
+        let dataMin = Infinity, dataMax = -Infinity;
+        data.forEach(d => {
+          const val = d[this.dataKey];
+          if (val !== undefined && !isNaN(val)) {
+            dataMin = Math.min(dataMin, val);
+            dataMax = Math.max(dataMax, val);
+          }
+        });
+
+        const minVal = this.minVal !== null ? this.minVal : dataMin;
+        const maxVal = this.maxVal !== null ? this.maxVal : dataMax;
+        const valRange = maxVal - minVal;
+
+        if (valRange <= 0) return false;
+
+        // Generate polyline points
+        let points = [];
+        data.forEach(point => {
+          const pointDate = this.parseDate(point.timestamp);
+          if (!pointDate) return;
+
+          const msFromStart = pointDate.getTime() - firstDate.getTime();
+          const timeProgress = msFromStart / timeSpanMs;
+          const x = this.xMin + (timeProgress * this.xRange);
+
+          const val = point[this.dataKey];
+          const normalized = (val - minVal) / valRange;
+          const y = this.yBottom - (normalized * this.yRange);
+
+          // Ensure points stay within bounds
+          const xClamped = Math.max(this.xMin, Math.min(this.xMax, x));
+          const yClamped = Math.max(this.yTop, Math.min(this.yBottom, y));
+
+          points.push(`${xClamped.toFixed(1)},${yClamped.toFixed(1)}`);
+        });
+
+        this.polyline.setAttribute('points', points.join(' '));
+        return true;
+      } catch (e) {
+        console.error('Chart render error:', e);
+        return false;
       }
-      const normalized = Math.max(0, Math.min(1, (d.temp - minT) / range));
-      const y = 230 - (normalized * 200);
-      points += x.toFixed(1) + ',' + y.toFixed(1) + ' ';
-    });
-    tempPoly.setAttribute('points', points.trim());
-    console.log(`✓ Temperature: ${chartData.length} points, x range [${minX.toFixed(1)}, ${maxX.toFixed(1)}]`);
+    }
   }
-  
-  // Humidity chart
-  const humPoly = charts[1].querySelector('polyline');
-  if(humPoly) {
-    let points = '';
-    const minH = 50, maxH = 95;
-    const range = maxH - minH;
-    
-    chartData.forEach((d) => {
-      const x = getXFromTimestamp(d.timestamp);
-      const normalized = Math.max(0, Math.min(1, (d.humidity - minH) / range));
-      const y = 230 - (normalized * 200);
-      points += x.toFixed(1) + ',' + y.toFixed(1) + ' ';
-    });
-    humPoly.setAttribute('points', points.trim());
-    console.log(`✓ Humidity: ${chartData.length} points mapped`);
+
+  // Render all three charts
+  const tempPoly = document.getElementById('temp-line') || document.querySelector('svg.metric-chart:nth-of-type(1) polyline');
+  const humPoly = document.getElementById('hum-line') || document.querySelector('svg.metric-chart:nth-of-type(2) polyline');
+  const vpdPoly = document.getElementById('vpd-line') || document.querySelector('svg.metric-chart:nth-of-type(3) polyline');
+
+  if (tempPoly) {
+    const renderer = new ChartRenderer(tempPoly, 'temp', 14, 32);
+    if (renderer.render(chartData)) {
+      console.log(`✓ Temperature chart: ${chartData.length} points rendered`);
+    }
   }
-  
-  // VPD chart
-  const vpdPoly = charts[2].querySelector('polyline');
-  if(vpdPoly) {
-    let points = '';
-    const minV = 0, maxV = 2.5;
-    const range = maxV - minV;
-    
-    chartData.forEach((d) => {
-      const x = getXFromTimestamp(d.timestamp);
-      const normalized = Math.max(0, Math.min(1, (d.vpd - minV) / range));
-      const y = 200 - (normalized * 180);
-      points += x.toFixed(1) + ',' + y.toFixed(1) + ' ';
-    });
-    vpdPoly.setAttribute('points', points.trim());
-    console.log(`✓ VPD: ${chartData.length} points mapped`);
+
+  if (humPoly) {
+    const renderer = new ChartRenderer(humPoly, 'humidity', 50, 95);
+    if (renderer.render(chartData)) {
+      console.log(`✓ Humidity chart: ${chartData.length} points rendered`);
+    }
   }
+
+  if (vpdPoly) {
+    const renderer = new ChartRenderer(vpdPoly, 'vpd', 0, 2.5);
+    if (renderer.render(chartData)) {
+      console.log(`✓ VPD chart: ${chartData.length} points rendered`);
+    }
+  }
+}
 }
 
 function updateOutdoorGaugeStatus(temp, humidity, vpd){
