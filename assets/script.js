@@ -835,8 +835,6 @@ function updateOutdoorPlantStatus(temp, humidity, vpd){
   // Assess overall viability
   if(temp < 18 || vpd > 2.0) {
     html += '<div class="status-item status-critical"><span class="status-icon">🔴</span><span class="status-text">Outdoor Growth Not Viable</span></div>';
-  } else {
-    html += '<div class="status-item status-warning"><span class="status-icon">🟡</span><span class="status-text">Greenhouse Engineering Required</span></div>';
   }
   
   display.innerHTML = html;
