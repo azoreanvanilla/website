@@ -779,6 +779,7 @@ function updateCharts(chartData){
   const timeSpanMs = lastDate.getTime() - firstDate.getTime();
   
   console.log(`📈 Rendering ${chartData.length} points from ${firstDate.toLocaleTimeString()} to ${lastDate.toLocaleTimeString()}`);
+  console.log(`📈 First timestamp: ${chartData[0].timestamp}, Last timestamp: ${chartData[chartData.length - 1].timestamp}`);
   
   // Calculate position mapping: x goes from 50 to 870 (820px available)
   const xMin = 50;
@@ -797,7 +798,8 @@ function updateCharts(chartData){
     
     // Map to percentage of time span, then to x coordinate
     const fraction = timeSpanMs > 0 ? msFromStart / timeSpanMs : 0;
-    return xMin + (fraction * xRange);
+    const x = xMin + (fraction * xRange);
+    return x;
   }
   
   // Temperature chart
@@ -807,14 +809,20 @@ function updateCharts(chartData){
     const minT = 14, maxT = 32;
     const range = maxT - minT;
     
-    chartData.forEach((d) => {
+    let minX = Infinity, maxX = -Infinity;
+    chartData.forEach((d, idx) => {
       const x = getXFromTimestamp(d.timestamp);
+      minX = Math.min(minX, x);
+      maxX = Math.max(maxX, x);
+      if(idx === 0 || idx === chartData.length - 1) {
+        console.log(`Point ${idx}: timestamp=${d.timestamp}, x=${x.toFixed(1)}`);
+      }
       const normalized = Math.max(0, Math.min(1, (d.temp - minT) / range));
       const y = 230 - (normalized * 200);
       points += x.toFixed(1) + ',' + y.toFixed(1) + ' ';
     });
     tempPoly.setAttribute('points', points.trim());
-    console.log(`✓ Temperature: ${chartData.length} points mapped`);
+    console.log(`✓ Temperature: ${chartData.length} points, x range [${minX.toFixed(1)}, ${maxX.toFixed(1)}]`);
   }
   
   // Humidity chart
