@@ -1073,7 +1073,9 @@ function updateOutdoorAssessmentStatus(temp, humidity, vpd){
   if(!display) return;
   
   const { name, policy } = getCurrentPolicy();
+  const isDay = isDaylight();
   const vpdTol = getVpdTolerance(policy);
+  const targetVpd = isDay ? policy.dv : policy.nv;  // Use appropriate VPD target (day or night)
   
   let html = '';
   
@@ -1106,11 +1108,11 @@ function updateOutdoorAssessmentStatus(temp, humidity, vpd){
   }
   
   // Assess VPD
-  const vpdInRange = vpd >= (policy.dv - vpdTol) && vpd <= (policy.dv + vpdTol);
+  const vpdInRange = vpd >= (targetVpd - vpdTol) && vpd <= (targetVpd + vpdTol);
   if(vpdInRange) {
     html += '<div class="status-item status-good"><span class="status-icon">🟢</span><span class="status-text">' + getStatusText('vpd_ideal') + ' (' + vpd.toFixed(2) + ' kPa)</span></div>';
   } else {
-    const distance = Math.abs(vpd - policy.dv);
+    const distance = Math.abs(vpd - targetVpd);
     const isWarning = distance < vpdTol * 1.5;
     if(isWarning) {
       html += '<div class="status-item status-warning"><span class="status-icon">🟡</span><span class="status-text">' + getStatusText('vpd_caution') + ' (' + vpd.toFixed(2) + ' kPa)</span></div>';
