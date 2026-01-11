@@ -355,6 +355,12 @@ footer .social-links a:has(.fa-telegram) i{color:#0088cc}
 .status-icon {
   font-size: 1.3rem;
 }
+.status-label {
+  font-weight: 600;
+  color: #666;
+  font-size: 0.85rem;
+  margin-right: 4px;
+}
 .status-text {
   font-weight: 700;
   color: var(--stone);

@@ -107,18 +107,21 @@
       <div class="status-display">
         <div class="status-item status-good">
           <span class="status-icon">🟢</span>
-          <span class="status-text" data-i18n="status_growth_phase">Optimal Growth Phase</span>
+          <span class="status-label">Growth Phase:</span>
+          <span class="status-text" data-i18n="status_growth_phase">Optimal</span>
         </div>
         <div class="status-item status-good">
           <span class="status-icon">🟢</span>
-          <span class="status-text" data-i18n="status_transpiration">Active Transpiration</span>
+          <span class="status-label">Transpiration:</span>
+          <span class="status-text" data-i18n="status_transpiration">Active</span>
         </div>
-        <div class="status-item status-watch">
-          <span class="status-icon">🟡</span>
-          <span class="status-text" data-i18n="status_monitoring">Monitoring for Fungi Risk</span>
+        <div class="status-item status-good">
+          <span class="status-icon">🟢</span>
+          <span class="status-label">Fungus Risk:</span>
+          <span class="status-text" data-i18n="status_fungus_risk">Low</span>
         </div>
       </div>
-      <p class="status-explanation" data-i18n="status_explanation">The greenhouse is in an optimal growth window. Current conditions support active nutrient absorption and plant development. VPD is ideal for stomatal function.</p>
+      <p class="status-explanation" id="dynamic-explanation"></p>
       <p class="status-updated"><small data-i18n="status_updated"></small></p>
     </section>
 

@@ -682,16 +682,62 @@ function updatePlantStatus(temp, humidity, vpd){
     items[0].className = 'status-item ' + getStatusClass(s.growthStatus);
     const icon = items[0].querySelector('.status-icon');
     if(icon) icon.textContent = getStatusIcon(s.growthStatus);
+    const textEl = items[0].querySelector('.status-text');
+    if(textEl) {
+      const statusKey = s.growthStatus === 'good' ? 'status_growth_optimal' 
+                      : s.growthStatus === 'warning' ? 'status_growth_caution' 
+                      : 'status_growth_critical';
+      textEl.textContent = getTranslation(statusKey);
+      textEl.setAttribute('data-i18n', statusKey);
+    }
   }
   if(items[1]) {
     items[1].className = 'status-item ' + getStatusClass(s.transpirationStatus);
     const icon = items[1].querySelector('.status-icon');
     if(icon) icon.textContent = getStatusIcon(s.transpirationStatus);
+    const textEl = items[1].querySelector('.status-text');
+    if(textEl) {
+      const statusKey = s.transpirationStatus === 'good' ? 'status_transpiration_active' 
+                      : s.transpirationStatus === 'warning' ? 'status_transpiration_limited' 
+                      : 'status_transpiration_poor';
+      textEl.textContent = getTranslation(statusKey);
+      textEl.setAttribute('data-i18n', statusKey);
+    }
   }
   if(items[2]) {
     items[2].className = 'status-item ' + getStatusClass(s.fungusRisk);
     const icon = items[2].querySelector('.status-icon');
     if(icon) icon.textContent = getStatusIcon(s.fungusRisk);
+    const textEl = items[2].querySelector('.status-text');
+    if(textEl) {
+      const statusKey = s.fungusRisk === 'good' ? 'status_fungus_low' 
+                      : s.fungusRisk === 'warning' ? 'status_fungus_elevated' 
+                      : 'status_fungus_critical';
+      textEl.textContent = getTranslation(statusKey);
+      textEl.setAttribute('data-i18n', statusKey);
+    }
+  }
+  
+  // Update dynamic explanation based on worst status
+  const worstStatus = [s.growthStatus, s.transpirationStatus, s.fungusRisk].includes('critical') ? 'critical' 
+                    : [s.growthStatus, s.transpirationStatus, s.fungusRisk].includes('warning') ? 'warning' 
+                    : 'good';
+  
+  let explanationKey = 'explanation_all_optimal';
+  if(worstStatus === 'critical') {
+    if(s.growthStatus === 'critical') explanationKey = 'explanation_temp_critical';
+    else if(s.transpirationStatus === 'critical') explanationKey = 'explanation_trans_critical';
+    else if(s.fungusRisk === 'critical') explanationKey = 'explanation_fungus_critical';
+  } else if(worstStatus === 'warning') {
+    if(s.growthStatus === 'warning') explanationKey = 'explanation_temp_warning';
+    else if(s.transpirationStatus === 'warning') explanationKey = 'explanation_trans_warning';
+    else if(s.fungusRisk === 'warning') explanationKey = 'explanation_fungus_warning';
+  }
+  
+  const explanationEl = q('#dynamic-explanation');
+  if(explanationEl) {
+    explanationEl.textContent = getTranslation(explanationKey);
+    explanationEl.setAttribute('data-i18n', explanationKey);
   }
 }
 
