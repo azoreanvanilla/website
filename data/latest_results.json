@@ -1,1 +1,1 @@
-{"timestamp": "2026-01-10T23:00:00.300349-01:00", "greenhouse": {"timestamp": "2026-01-10 22:58:05", "temp": 18.7, "humidity": 86.5, "vpd": 0.291, "dew_point": 16.4}, "outdoor": {"timestamp": "2026-01-10 21:19:57", "temp": 17.8, "humidity": 83.4, "vpd": 0.338, "dew_point": 14.95}}
+{"timestamp": "2026-01-11T00:00:00.378748-01:00", "greenhouse": {"timestamp": "2026-01-10 23:58:05", "temp": 18.8, "humidity": 86.4, "vpd": 0.295, "dew_point": 16.48}, "outdoor": {"timestamp": "2026-01-10 23:19:58", "temp": 17.7, "humidity": 84.3, "vpd": 0.318, "dew_point": 15.01}}
