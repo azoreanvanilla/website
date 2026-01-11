@@ -192,7 +192,14 @@
     "terms_10_3": "10.3. By continuing to use the Website after changes are made, you agree to the updated Terms.",
     "terms_11_title": "11. Governing Law and Dispute Resolution",
     "terms_11_1": "11.1. These Terms and any issues related to the use of the Website shall be governed by the laws of [insert country / jurisdiction, e.g. Portugal / EU / other].",
-    "terms_11_2": "11.2. Any disputes, controversies, or claims arising out of or in connection with the use of the Website shall be subject to the jurisdiction of the competent courts at the place of registration of the Website owner, unless otherwise required by mandatory provisions of applicable law."
+    "terms_11_2": "11.2. Any disputes, controversies, or claims arising out of or in connection with the use of the Website shall be subject to the jurisdiction of the competent courts at the place of registration of the Website owner, unless otherwise required by mandatory provisions of applicable law.",
+    "current_outdoor_conditions": "Current Outdoor Conditions",
+    "azorean_average": "Azorean Average",
+    "outdoor_vpd": "Outdoor VPD",
+    "outdoor_assessment": "Outdoor Environment Assessment",
+    "temp_caution": "Temperature Caution",
+    "hum_critical": "Humidity Critical",
+    "vpd_critical": "VPD Critical"
   },
   "pt": {
     "nav_home": "Início", "nav_about": "Quem Somos", "nav_visits": "Visitas", "nav_invest": "Investimentos", "nav_stats": "Estatísticas", "nav_contact": "Contacto",
