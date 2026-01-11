@@ -1147,21 +1147,21 @@ function updateComparisonTableOutdoor(temp, humidity, vpd){
   
   if(compTempOutside) {
     const tempStatus = tempInPolicy ? 'good' : (Math.abs(temp - policy.t_min) < 3 || Math.abs(temp - policy.t_max) < 3 ? 'warning' : 'critical');
-    const badge = temp < policy.t_min ? '↓' : (temp > policy.t_max ? '↑' : '→');
+    const badge = temp < policy.t_min ? '↓' : (temp > policy.t_max ? '↑' : '✓');
     compTempOutside.className = 'comparison-cell outside ' + tempStatus;
     compTempOutside.innerHTML = temp.toFixed(1) + '°C <span class="badge">' + badge + '</span>';
   }
   
   if(compHumOutside) {
     const humStatus = humInPolicy ? 'good' : (Math.abs(humidity - policy.h_min) < 5 || Math.abs(humidity - policy.h_max) < 5 ? 'warning' : 'critical');
-    const badge = humidity < policy.h_min ? '↓' : (humidity > policy.h_max ? '↑' : '→');
+    const badge = humidity < policy.h_min ? '↓' : (humidity > policy.h_max ? '↑' : '✓');
     compHumOutside.className = 'comparison-cell outside ' + humStatus;
     compHumOutside.innerHTML = humidity.toFixed(0) + '% <span class="badge">' + badge + '</span>';
   }
   
   if(compVpdOutside) {
     const vpdStatus = vpdInPolicy ? 'good' : (Math.abs(vpd - targetVpd) < vpdTol * 1.5 ? 'warning' : 'critical');
-    const badge = vpd < (targetVpd - vpdTol) ? '↓' : (vpd > (targetVpd + vpdTol) ? '↑' : '→');
+    const badge = vpd < (targetVpd - vpdTol) ? '↓' : (vpd > (targetVpd + vpdTol) ? '↑' : '✓');
     compVpdOutside.className = 'comparison-cell outside ' + vpdStatus;
     compVpdOutside.innerHTML = vpd.toFixed(2) + ' kPa <span class="badge">' + badge + '</span>';
   }
