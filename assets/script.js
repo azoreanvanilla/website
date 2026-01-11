@@ -22,6 +22,9 @@ let currentOutdoorValues = { temp: null, humidity: null, vpd: null };
 
 // Function to update statuses when language changes
 function updateStatusesOnLanguageChange() {
+  // Re-apply all data-i18n translations
+  if(window.__applyI18n) window.__applyI18n();
+  
   if (currentGreenhouseValues.temp !== null) {
     updateGaugeStatus(currentGreenhouseValues.temp, currentGreenhouseValues.humidity, currentGreenhouseValues.vpd);
   }
