@@ -22,8 +22,10 @@ let currentOutdoorValues = { temp: null, humidity: null, vpd: null };
 
 // Function to update statuses when language changes
 function updateStatusesOnLanguageChange() {
-  // Re-apply all data-i18n translations
-  if(window.__applyI18n) window.__applyI18n();
+  // Re-apply all data-i18n translations with current language
+  if(window.__applyI18n && window.__TRANSLATIONS && window.__site_lang) {
+    window.__applyI18n(window.__TRANSLATIONS[window.__site_lang] || window.__TRANSLATIONS.en);
+  }
   
   if (currentGreenhouseValues.temp !== null) {
     updateGaugeStatus(currentGreenhouseValues.temp, currentGreenhouseValues.humidity, currentGreenhouseValues.vpd);
