@@ -1132,7 +1132,9 @@ function updateOutdoorPlantStatus(temp, humidity, vpd){
 function updateComparisonTableOutdoor(temp, humidity, vpd){
   // Get current policy for comparison
   const { name, policy } = getCurrentPolicy();
+  const isDay = isDaylight();
   const vpdTol = getVpdTolerance(policy);
+  const targetVpd = isDay ? policy.dv : policy.nv;  // Use appropriate VPD target (day or night)
   
   // Update the comparison table with actual outdoor values - compare against policy
   const compTempOutside = q('#comp-temp-outside');
@@ -1141,7 +1143,7 @@ function updateComparisonTableOutdoor(temp, humidity, vpd){
   
   const tempInPolicy = temp >= policy.t_min && temp <= policy.t_max;
   const humInPolicy = humidity >= policy.h_min && humidity <= policy.h_max;
-  const vpdInPolicy = vpd >= (policy.dv - vpdTol) && vpd <= (policy.dv + vpdTol);
+  const vpdInPolicy = vpd >= (targetVpd - vpdTol) && vpd <= (targetVpd + vpdTol);
   
   if(compTempOutside) {
     const tempStatus = tempInPolicy ? 'good' : (Math.abs(temp - policy.t_min) < 3 || Math.abs(temp - policy.t_max) < 3 ? 'warning' : 'critical');
@@ -1158,8 +1160,8 @@ function updateComparisonTableOutdoor(temp, humidity, vpd){
   }
   
   if(compVpdOutside) {
-    const vpdStatus = vpdInPolicy ? 'good' : (Math.abs(vpd - policy.dv) < vpdTol * 1.5 ? 'warning' : 'critical');
-    const badge = vpd < (policy.dv - vpdTol) ? '↓' : (vpd > (policy.dv + vpdTol) ? '↑' : '→');
+    const vpdStatus = vpdInPolicy ? 'good' : (Math.abs(vpd - targetVpd) < vpdTol * 1.5 ? 'warning' : 'critical');
+    const badge = vpd < (targetVpd - vpdTol) ? '↓' : (vpd > (targetVpd + vpdTol) ? '↑' : '→');
     compVpdOutside.className = 'comparison-cell outside ' + vpdStatus;
     compVpdOutside.innerHTML = vpd.toFixed(2) + ' kPa <span class="badge">' + badge + '</span>';
   }
