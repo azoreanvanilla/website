@@ -508,7 +508,32 @@ function showMessage(msg){
 }
 
 // Load current values from latest_results.json
+// Wait for translations to be loaded before rendering status text
+async function waitForTranslations() {
+  return new Promise(resolve => {
+    if (window.__TRANSLATIONS) {
+      resolve();
+    } else {
+      const maxWait = 3000; // Max 3 seconds
+      const startTime = Date.now();
+      const checkInterval = setInterval(() => {
+        if (window.__TRANSLATIONS) {
+          clearInterval(checkInterval);
+          resolve();
+        } else if (Date.now() - startTime > maxWait) {
+          clearInterval(checkInterval);
+          console.warn('Translations took too long to load, proceeding anyway');
+          resolve();
+        }
+      }, 50);
+    }
+  });
+}
+
 async function loadCurrentValues(){
+  // Ensure translations are loaded before rendering status text
+  await waitForTranslations();
+  
   try {
     const res = await fetch('data/latest_results.json');
     if (!res.ok) return;
