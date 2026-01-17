@@ -586,15 +586,22 @@ async function loadCurrentValues(){
   }
 }
 
-// Load chart data from latest_24_results.csv (greenhouse only)
+// Load chart data from latest_24_greenhouse_results.csv and latest_24_outdoor_results.csv
 async function loadChartsData(){
   try {
-    const res = await fetch('data/latest_24_results.csv');
-    if (!res.ok) return;
+    // Load both greenhouse and outdoor data
+    const ghRes = await fetch('data/latest_24_greenhouse_results.csv');
+    const outRes = await fetch('data/latest_24_outdoor_results.csv');
     
-    const text = await res.text();
-    const data = parseCSV(text);
-    const chartData = generateChartData(data);
+    if (!ghRes.ok || !outRes.ok) return;
+    
+    const ghText = await ghRes.text();
+    const outText = await outRes.text();
+    
+    const ghData = parseCSV(ghText);
+    const outData = parseCSV(outText);
+    
+    const chartData = generateChartData(ghData, outData);
     updateCharts(chartData);
   } catch(err) {
     // Silently fail if data unavailable
@@ -850,37 +857,42 @@ function updateMetricCards(temp, humidity, vpd){
   if(cardVpd) cardVpd.textContent = vpd.toFixed(2);
 }
 
-function generateChartData(dataRows){
-  // Filter data to last 24 hours (by timestamp, not row count)
-  // ONLY include greenhouse data (skip outdoor)
-  if(dataRows.length === 0) return [];
+function generateChartData(ghDataRows, outDataRows){
+  // Generate separate chart datasets for greenhouse and outdoor
+  // Both use last 24 hours of their respective data
   
-  // Get the latest timestamp
-  const latestRow = dataRows[dataRows.length - 1];
-  if(!latestRow || !latestRow._date) return [];
+  const processData = (dataRows, location) => {
+    if(!dataRows || dataRows.length === 0) return [];
+    
+    const latestRow = dataRows[dataRows.length - 1];
+    if(!latestRow || !latestRow._date) return [];
+    
+    const latestTime = latestRow._date.getTime();
+    const oneDayMs = 24 * 60 * 60 * 1000;
+    const cutoffTime = latestTime - oneDayMs;
+    
+    // Filter rows from the last 24 hours for this location
+    const last24h = dataRows.filter(row => {
+      if(!row._date) return false;
+      if(row._values[1] !== location) return false;
+      return row._date.getTime() >= cutoffTime;
+    });
+    
+    return last24h.map(row => ({
+      temp: parseFloat(row._values[2]),
+      humidity: parseFloat(row._values[3]),
+      vpd: parseFloat(row._values[4]),
+      timestamp: row._values[0]
+    }));
+  };
   
-  const latestTime = latestRow._date.getTime();
-  const oneDayMs = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
-  const cutoffTime = latestTime - oneDayMs;
+  const ghData = processData(ghDataRows, 'greenhouse');
+  const outData = processData(outDataRows, 'outdoor');
   
-  // Filter rows from the last 24 hours AND greenhouse location only
-  const last24h = dataRows.filter(row => {
-    if(!row._date) return false;
-    // Only include greenhouse data (row._values[1] is location)
-    if(row._values[1] !== 'greenhouse') return false;
-    return row._date.getTime() >= cutoffTime;
-  });
-  
-  if(last24h.length > 0) {
-    // Filtered data available
-  }
-  
-  return last24h.map(row => ({
-    temp: parseFloat(row._values[2]),
-    humidity: parseFloat(row._values[3]),
-    vpd: parseFloat(row._values[4]),
-    timestamp: row._values[0]
-  }));
+  return {
+    greenhouse: ghData,
+    outdoor: outData
+  };
 }
 
 function updateChartTimeLabels(chartData) {
@@ -1032,25 +1044,42 @@ function updateCharts(chartData){
     }
   }
 
-  // Render all three charts
-  const tempPoly = document.getElementById('temp-line');
-  const humPoly = document.getElementById('hum-line');
-  const vpdPoly = document.getElementById('vpd-line');
+  // Render all three charts with both greenhouse and outdoor lines
+  const tempPolyGH = document.getElementById('temp-line-greenhouse');
+  const tempPolyOut = document.getElementById('temp-line-outdoor');
+  const humPolyGH = document.getElementById('hum-line-greenhouse');
+  const humPolyOut = document.getElementById('hum-line-outdoor');
+  const vpdPolyGH = document.getElementById('vpd-line-greenhouse');
+  const vpdPolyOut = document.getElementById('vpd-line-outdoor');
 
-  if (tempPoly) {
-    new ChartRenderer(tempPoly, 'temp', 14, 32).render(chartData);
+  // Temperature chart
+  if (tempPolyGH && chartData.greenhouse) {
+    new ChartRenderer(tempPolyGH, 'temp', 14, 32).render(chartData.greenhouse);
+  }
+  if (tempPolyOut && chartData.outdoor) {
+    new ChartRenderer(tempPolyOut, 'temp', 14, 32).render(chartData.outdoor);
   }
 
-  if (humPoly) {
-    new ChartRenderer(humPoly, 'humidity', 50, 95).render(chartData);
+  // Humidity chart
+  if (humPolyGH && chartData.greenhouse) {
+    new ChartRenderer(humPolyGH, 'humidity', 50, 95).render(chartData.greenhouse);
+  }
+  if (humPolyOut && chartData.outdoor) {
+    new ChartRenderer(humPolyOut, 'humidity', 50, 95).render(chartData.outdoor);
   }
 
-  if (vpdPoly) {
-    new ChartRenderer(vpdPoly, 'vpd', 0, 2.5).render(chartData);
+  // VPD chart
+  if (vpdPolyGH && chartData.greenhouse) {
+    new ChartRenderer(vpdPolyGH, 'vpd', 0, 2.5).render(chartData.greenhouse);
+  }
+  if (vpdPolyOut && chartData.outdoor) {
+    new ChartRenderer(vpdPolyOut, 'vpd', 0, 2.5).render(chartData.outdoor);
   }
 
-  // Update time labels dynamically based on actual data timestamps
-  updateChartTimeLabels(chartData);
+  // Update time labels dynamically based on actual data timestamps (use greenhouse data for timing)
+  if (chartData.greenhouse && chartData.greenhouse.length > 0) {
+    updateChartTimeLabels(chartData.greenhouse);
+  }
 }
 
 function updateOutdoorGaugeStatus(temp, humidity, vpd){

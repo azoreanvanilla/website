@@ -248,9 +248,13 @@
           <rect x="50" y="45" width="820" height="105" fill="url(#temp-grad)" opacity="0.5"/>
           <text x="55" y="95" font-size="9" fill="#0066cc" opacity="0.5" font-weight="600" id="chart-temp-label">Optimal: 18–24°C</text>
           
-          <!-- TEMPERATURE LINE -->
-          <polyline id="temp-line" points="" 
-                    fill="none" stroke="#0066cc" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" clip-path="url(#temp-chart-clip)"/>
+          <!-- TEMPERATURE LINE (GREENHOUSE - Red) -->
+          <polyline id="temp-line-greenhouse" points="" 
+                    fill="none" stroke="#e74c3c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" clip-path="url(#temp-chart-clip)"/>
+          
+          <!-- TEMPERATURE LINE (OUTDOOR - Blue) -->
+          <polyline id="temp-line-outdoor" points="" 
+                    fill="none" stroke="#3498db" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" clip-path="url(#temp-chart-clip)"/>
         </svg>
       </div>
 
@@ -300,9 +304,13 @@
           <rect x="50" y="55" width="820" height="85" fill="url(#hum-grad)" opacity="0.5"/>
           <text x="55" y="105" font-size="9" fill="#27ae60" opacity="0.5" font-weight="600" id="chart-hum-label">Optimal: 65–75%</text>
           
-          <!-- HUMIDITY LINE -->
-          <polyline id="hum-line" points="" 
-                    fill="none" stroke="#27ae60" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" clip-path="url(#hum-chart-clip)"/>
+          <!-- HUMIDITY LINE (GREENHOUSE - Red) -->
+          <polyline id="hum-line-greenhouse" points="" 
+                    fill="none" stroke="#e74c3c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" clip-path="url(#hum-chart-clip)"/>
+          
+          <!-- HUMIDITY LINE (OUTDOOR - Blue) -->
+          <polyline id="hum-line-outdoor" points="" 
+                    fill="none" stroke="#3498db" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" clip-path="url(#hum-chart-clip)"/>
         </svg>
       </div>
 
@@ -353,9 +361,13 @@
           <rect x="50" y="80" width="820" height="56" fill="url(#vpd-grad)" opacity="0.5"/>
           <text x="55" y="110" font-size="9" fill="#f39c12" opacity="0.5" font-weight="600" id="chart-vpd-label"></text>
           
-          <!-- VPD LINE -->
-          <polyline id="vpd-line" points="" 
-                    fill="none" stroke="#f39c12" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" clip-path="url(#vpd-chart-clip)"/>
+          <!-- VPD LINE (GREENHOUSE - Red) -->
+          <polyline id="vpd-line-greenhouse" points="" 
+                    fill="none" stroke="#e74c3c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" clip-path="url(#vpd-chart-clip)"/>
+          
+          <!-- VPD LINE (OUTDOOR - Blue) -->
+          <polyline id="vpd-line-outdoor" points="" 
+                    fill="none" stroke="#3498db" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" clip-path="url(#vpd-chart-clip)"/>
         </svg>
       </div>
 
