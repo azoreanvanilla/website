@@ -794,15 +794,49 @@ function updateGaugeStatus(temp, humidity, vpd){
   
   const tempStatus = tempInRange ? 'optimal' : (Math.abs(temp - policy.t_min) < 2 || Math.abs(temp - policy.t_max) < 2 ? 'caution' : 'critical');
   const humStatus = humInRange ? 'optimal' : (Math.abs(humidity - policy.h_min) < 5 || Math.abs(humidity - policy.h_max) < 5 ? 'caution' : 'critical');
-  const vpdStatus = vpdInRange ? 'ideal' : (Math.abs(vpd - targetVpd) < vpdTol * 1.5 ? 'caution' : 'critical');
   
-  const tempEl = q('#gauge-temp-status');
-  const humEl = q('#gauge-hum-status');
-  const vpdEl = q('#gauge-vpd-status');
+  // VPD status with CAM-aware logic
+  let vpdStatus = 'ideal';
+  let vpdClass = 'good';
+  
+  if(vpdInRange) {
+    vpdStatus = isDay ? 'day_photo_optimal' : 'night_co2_optimal';
+    vpdClass = 'good';
+  } else {
+    const distance = Math.abs(vpd - targetVpd);
+    const isWarning = distance < vpdTol * 1.5;
+    
+    if(isDay) {
+      // Daytime: stomata closed, using stored acids
+      if(vpd < targetVpd - vpdTol) {
+        // Too humid during day = excess moisture risk
+        vpdStatus = 'day_excess_moisture';
+        vpdClass = isWarning ? 'warning' : 'critical';
+      } else {
+        // VPD too high during day = actually good (minimal risk)
+        vpdStatus = 'day_photo_optimal';
+        vpdClass = 'good';
+      }
+    } else {
+      // Nighttime: stomata open for CO2 uptake
+      if(vpd < targetVpd - vpdTol) {
+        // Too humid at night = transpiration limited
+        vpdStatus = 'night_trans_limited';
+        vpdClass = isWarning ? 'warning' : 'critical';
+      } else {
+        // VPD too high at night = CO2 uptake limited
+        vpdStatus = 'night_co2_limited';
+        vpdClass = isWarning ? 'warning' : 'critical';
+      }
+    }
+  }
   
   const tempClass = tempInRange ? 'good' : (tempStatus === 'caution' ? 'warning' : 'critical');
   const humClass = humInRange ? 'good' : (humStatus === 'caution' ? 'warning' : 'critical');
-  const vpdClass = vpdInRange ? 'good' : (vpdStatus === 'caution' ? 'warning' : 'critical');
+  
+  const tempEl = q('#live-temp-status');
+  const humEl = q('#live-hum-status');
+  const vpdEl = q('#live-vpd-status');
   
   if(tempEl) {
     tempEl.textContent = getStatusText(tempStatus);
@@ -813,7 +847,15 @@ function updateGaugeStatus(temp, humidity, vpd){
     humEl.className = 'gauge-status ' + humClass;
   }
   if(vpdEl) {
-    vpdEl.textContent = getStatusText(vpdStatus);
+    // Map CAM-aware VPD status to translation keys
+    let vpdTranslationKey = 'vpd_ideal';
+    if(vpdStatus === 'day_photo_optimal') vpdTranslationKey = 'vpd_day_photo_optimal';
+    else if(vpdStatus === 'day_excess_moisture') vpdTranslationKey = 'vpd_day_excess_moisture';
+    else if(vpdStatus === 'night_co2_optimal') vpdTranslationKey = 'vpd_night_co2_optimal';
+    else if(vpdStatus === 'night_co2_limited') vpdTranslationKey = 'vpd_night_co2_limited';
+    else if(vpdStatus === 'night_trans_limited') vpdTranslationKey = 'vpd_night_trans_limited';
+    
+    vpdEl.textContent = getStatusText(vpdTranslationKey);
     vpdEl.className = 'gauge-status ' + vpdClass;
   }
   
