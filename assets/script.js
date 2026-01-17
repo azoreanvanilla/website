@@ -758,6 +758,15 @@ function updatePlantStatus(temp, humidity, vpd){
     items[1].className = 'status-item ' + getStatusClass(s.transpirationStatus);
     const icon = items[1].querySelector('.status-icon');
     if(icon) icon.textContent = getStatusIcon(s.transpirationStatus);
+    
+    // Update label dynamically based on day/night
+    const labelEl = items[1].querySelector('.status-label');
+    if(labelEl) {
+      const labelKey = s.isDay ? 'status_label_photosynthesis' : 'status_label_co2_uptake';
+      labelEl.textContent = getStatusText(labelKey);
+      labelEl.setAttribute('data-i18n', labelKey);
+    }
+    
     const textEl = items[1].querySelector('.status-text');
     if(textEl) {
       // CAM-aware status: Use CO2 uptake at night, Photosynthesis during day
@@ -782,6 +791,15 @@ function updatePlantStatus(temp, humidity, vpd){
     items[2].className = 'status-item ' + getStatusClass(s.secondaryStatus);
     const icon = items[2].querySelector('.status-icon');
     if(icon) icon.textContent = getStatusIcon(s.secondaryStatus);
+    
+    // Update label dynamically based on day/night
+    const labelEl = items[2].querySelector('.status-label');
+    if(labelEl) {
+      const labelKey = s.isDay ? 'status_label_moisture' : 'status_label_transpiration';
+      labelEl.textContent = getStatusText(labelKey);
+      labelEl.setAttribute('data-i18n', labelKey);
+    }
+    
     const textEl = items[2].querySelector('.status-text');
     if(textEl) {
       let statusKey;
