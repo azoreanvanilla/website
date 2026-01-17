@@ -593,22 +593,7 @@ async function loadChartsData(){
     const ghRes = await fetch('data/latest_24_greenhouse_results.csv');
     const outRes = await fetch('data/latest_24_outdoor_results.csv');
     
-    if (!ghRes.ok || !outRes.ok) {
-      console.warn('New CSV format not available yet, attempting fallback...');
-      // Fallback: try loading old combined format for backwards compatibility
-      const res = await fetch('data/latest_24_results.csv');
-      if (!res.ok) return;
-      const text = await res.text();
-      const data = parseCSV(text);
-      
-      // Split into greenhouse and outdoor
-      const ghData = data.filter(row => row._values && row._values[1] === 'greenhouse');
-      const outData = data.filter(row => row._values && row._values[1] === 'outdoor');
-      
-      const chartData = generateChartData(ghData, outData);
-      updateCharts(chartData);
-      return;
-    }
+    if (!ghRes.ok || !outRes.ok) return;
     
     const ghText = await ghRes.text();
     const outText = await outRes.text();
@@ -619,7 +604,7 @@ async function loadChartsData(){
     const chartData = generateChartData(ghData, outData);
     updateCharts(chartData);
   } catch(err) {
-    console.error('Chart loading error:', err);
+    // Silently fail if data unavailable
   }
 }
 
@@ -874,24 +859,35 @@ function updateMetricCards(temp, humidity, vpd){
 
 function generateChartData(ghDataRows, outDataRows){
   // Generate separate chart datasets for greenhouse and outdoor
-  // Each CSV file already contains only one location, so just process and return
+  // Both use last 24 hours of their respective data
   
-  const processData = (dataRows) => {
+  const processData = (dataRows, location) => {
     if(!dataRows || dataRows.length === 0) return [];
     
-    return dataRows.map(row => {
-      if(!row._values) return null;
-      return {
-        temp: parseFloat(row._values[2]),
-        humidity: parseFloat(row._values[3]),
-        vpd: parseFloat(row._values[4]),
-        timestamp: row._values[0]
-      };
-    }).filter(d => d !== null);
+    const latestRow = dataRows[dataRows.length - 1];
+    if(!latestRow || !latestRow._date) return [];
+    
+    const latestTime = latestRow._date.getTime();
+    const oneDayMs = 24 * 60 * 60 * 1000;
+    const cutoffTime = latestTime - oneDayMs;
+    
+    // Filter rows from the last 24 hours for this location
+    const last24h = dataRows.filter(row => {
+      if(!row._date) return false;
+      if(row._values[1] !== location) return false;
+      return row._date.getTime() >= cutoffTime;
+    });
+    
+    return last24h.map(row => ({
+      temp: parseFloat(row._values[2]),
+      humidity: parseFloat(row._values[3]),
+      vpd: parseFloat(row._values[4]),
+      timestamp: row._values[0]
+    }));
   };
   
-  const ghData = processData(ghDataRows);
-  const outData = processData(outDataRows);
+  const ghData = processData(ghDataRows, 'greenhouse');
+  const outData = processData(outDataRows, 'outdoor');
   
   return {
     greenhouse: ghData,
@@ -1165,18 +1161,51 @@ function updateOutdoorAssessmentStatus(temp, humidity, vpd){
     }
   }
   
-  // Assess VPD
+  // Assess VPD with CAM-specific logic
   const vpdInRange = vpd >= (targetVpd - vpdTol) && vpd <= (targetVpd + vpdTol);
+  
+  let vpdStatusKey = '';
+  let vpdClass = '';
+  
   if(vpdInRange) {
-    html += '<div class="status-item status-good"><span class="status-icon">🟢</span><span class="status-text">' + getStatusText('vpd_ideal') + ' (' + vpd.toFixed(2) + ' kPa)</span></div>';
+    vpdClass = 'status-good';
+    // Different status based on day/night for CAM plant
+    vpdStatusKey = isDay ? 'vpd_day_photo_optimal' : 'vpd_night_co2_optimal';
   } else {
     const distance = Math.abs(vpd - targetVpd);
     const isWarning = distance < vpdTol * 1.5;
-    if(isWarning) {
-      html += '<div class="status-item status-warning"><span class="status-icon">🟡</span><span class="status-text">' + getStatusText('vpd_caution') + ' (' + vpd.toFixed(2) + ' kPa)</span></div>';
+    
+    if(isDay) {
+      // Daytime: stomata closed, using stored acids
+      if(vpdClass === '') {
+        if(vpd < targetVpd - vpdTol) {
+          // Too humid during day = excess moisture risk
+          vpdStatusKey = 'vpd_day_excess_moisture';
+          vpdClass = isWarning ? 'status-warning' : 'status-critical';
+        } else {
+          // VPD too high during day = actually good (minimal risk)
+          vpdStatusKey = 'vpd_day_photo_optimal';
+          vpdClass = 'status-good';
+        }
+      }
     } else {
-      html += '<div class="status-item status-critical"><span class="status-icon">🔴</span><span class="status-text">' + getStatusText('vpd_critical') + ' (' + vpd.toFixed(2) + ' kPa)</span></div>';
+      // Nighttime: stomata open for CO2 uptake
+      if(vpdClass === '') {
+        if(vpd < targetVpd - vpdTol) {
+          // Too humid at night = transpiration limited (not ideal for stomatal opening)
+          vpdStatusKey = 'vpd_night_trans_limited';
+          vpdClass = isWarning ? 'status-warning' : 'status-critical';
+        } else {
+          // VPD too high at night = CO2 uptake limited (dry air prevents stomata opening)
+          vpdStatusKey = 'vpd_night_co2_limited';
+          vpdClass = isWarning ? 'status-warning' : 'status-critical';
+        }
+      }
     }
+  }
+  
+  if(vpdStatusKey) {
+    html += '<div class="status-item ' + vpdClass + '"><span class="status-icon">' + (vpdClass === 'status-good' ? '🟢' : (vpdClass === 'status-warning' ? '🟡' : '🔴')) + '</span><span class="status-text">' + getStatusText(vpdStatusKey) + ' (' + vpd.toFixed(2) + ' kPa)</span></div>';
   }
   
   display.innerHTML = html;

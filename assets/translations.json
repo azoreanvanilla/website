@@ -199,7 +199,13 @@
     "outdoor_assessment": "Outdoor Environment Assessment",
     "temp_caution": "Temperature Caution",
     "hum_critical": "Humidity Critical",
-    "vpd_critical": "VPD Critical"
+    "vpd_critical": "VPD Critical",
+    "vpd_night_co2_optimal": "CO2 Uptake Optimal",
+    "vpd_night_co2_limited": "CO2 Uptake Limited",
+    "vpd_night_trans_limited": "Transpiration Limited",
+    "vpd_day_photo_optimal": "Photosynthesis Optimal",
+    "vpd_day_photo_limited": "Photosynthesis Limited",
+    "vpd_day_excess_moisture": "Excess Moisture Risk"
   },
   "pt": {
     "nav_home": "Início", "nav_about": "Quem Somos", "nav_visits": "Visitas", "nav_invest": "Investimentos", "nav_stats": "Estatísticas", "nav_contact": "Contacto",
@@ -403,6 +409,12 @@
     "terms_10_3": "10.3. Ao continuar a utilizar o Website após a introdução de alterações, o utilizador considera-se vinculado aos Termos atualizados.",
     "terms_11_title": "11. Lei Aplicável e Resolução de Litígios",
     "terms_11_1": "11.1. Os presentes Termos e quaisquer questões relacionadas com a utilização do Website regem-se pela lei de [indicar país / jurisdição, por exemplo: Portugal].",
-    "terms_11_2": "11.2. Quaisquer litígios, controvérsias ou reclamações decorrentes de ou relacionados com a utilização do Website serão submetidos aos tribunais competentes do local de registo do proprietário do Website, salvo disposição em contrário decorrente de normas imperativas da lei aplicável."
+    "terms_11_2": "11.2. Quaisquer litígios, controvérsias ou reclamações decorrentes de ou relacionados com a utilização do Website serão submetidos aos tribunais competentes do local de registo do proprietário do Website, salvo disposição em contrário decorrente de normas imperativas da lei aplicável.",
+    "vpd_night_co2_optimal": "Captação de CO₂ Ideal",
+    "vpd_night_co2_limited": "Captação de CO₂ Limitada",
+    "vpd_night_trans_limited": "Transpiração Limitada",
+    "vpd_day_photo_optimal": "Fotossíntese Ideal",
+    "vpd_day_photo_limited": "Fotossíntese Limitada",
+    "vpd_day_excess_moisture": "Risco de Excesso de Humidade"
   }
 }
