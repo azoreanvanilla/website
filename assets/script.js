@@ -692,7 +692,9 @@ function calculateStatus(temp, humidity, vpd){
       const isWarning = distance < vpdTol * 1.5;
       if(vpd < targetVpd - vpdTol) {
         // VPD too low (excess humidity) during day = moisture risk
-        transpirationStatus = isWarning ? 'warning' : 'critical';
+        // Consider both humidity AND VPD when assessing severity
+        const humCritical = humidity > (policy.h_max + 5);
+        transpirationStatus = (isWarning && !humCritical) ? 'warning' : 'critical';
         secondaryStatus = transpirationStatus; // "Excess Moisture Risk"
       } else {
         // VPD too high during day = doesn't affect photosynthesis (stomata closed)
@@ -708,7 +710,9 @@ function calculateStatus(temp, humidity, vpd){
       const isWarning = distance < vpdTol * 1.5;
       if(vpd < targetVpd - vpdTol) {
         // VPD too low (high humidity) at night = transpiration limited (restricts water loss and stomatal opening)
-        transpirationStatus = isWarning ? 'warning' : 'critical';
+        // Consider both humidity AND VPD when assessing severity
+        const humCritical = humidity > (policy.h_max + 5);
+        transpirationStatus = (isWarning && !humCritical) ? 'warning' : 'critical';
         secondaryStatus = transpirationStatus; // "Transpiration Limited"
       } else {
         // VPD too high (dry air) at night = CO2 uptake limited (prevents stomata from opening)
@@ -819,7 +823,7 @@ function updatePlantStatus(temp, humidity, vpd){
     }
   }
   
-  // Update dynamic explanation based on worst status
+  // Update dynamic explanation based on worst status and actual values
   const worstStatus = [s.growthStatus, s.transpirationStatus, s.secondaryStatus].includes('critical') ? 'critical' 
                     : [s.growthStatus, s.transpirationStatus, s.secondaryStatus].includes('warning') ? 'warning' 
                     : 'good';
@@ -831,7 +835,13 @@ function updatePlantStatus(temp, humidity, vpd){
     else if(s.secondaryStatus === 'critical') explanationKey = s.isDay ? 'explanation_moisture_critical' : 'explanation_trans_critical';
   } else if(worstStatus === 'warning') {
     if(s.growthStatus === 'warning') explanationKey = 'explanation_temp_warning';
-    else if(s.transpirationStatus === 'warning') explanationKey = 'explanation_trans_warning';
+    else if(s.transpirationStatus === 'warning') {
+      // Check if humidity is significantly off (not just slightly)
+      const { policy } = getCurrentPolicy();
+      const humDeviationPercent = Math.abs(humidity - (humidity > policy.h_max ? policy.h_max : policy.h_min));
+      const humSignificantlyOff = humDeviationPercent > 5; // More than 5% off
+      explanationKey = humSignificantlyOff ? 'explanation_trans_warning_high_hum' : 'explanation_trans_warning';
+    }
     else if(s.secondaryStatus === 'warning') explanationKey = s.isDay ? 'explanation_moisture_warning' : 'explanation_trans_warning';
   }
 
