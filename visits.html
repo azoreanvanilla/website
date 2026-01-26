@@ -23,6 +23,38 @@
     fetch('assets/translations.json').then(r=>r.json()).then(trans=>{ window.__TRANSLATIONS = trans; window.__site_lang = localStorage.getItem('site_lang') || 'en'; apply(window.__TRANSLATIONS[window.__site_lang] || window.__TRANSLATIONS.en); qAll('.lang-switch button').forEach(b=> b.addEventListener('click', ()=>{ window.__site_lang = b.getAttribute('data-lang'); localStorage.setItem('site_lang', window.__site_lang); apply(window.__TRANSLATIONS[window.__site_lang] || window.__TRANSLATIONS.en); })); }).catch(e=>console.warn('translations.json load failed',e));
   })();
   </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Is vanilla an orchid?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Vanilla comes from orchids (Orchidaceae). The spice is produced from vanilla orchid pods after pollination and curing."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How is this different from Azores pineapple plantations?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Pineapple plantations are an iconic Azorean tradition. Our visit is a complementary experience focused on vanilla orchid cultivation in a controlled greenhouse, including pollination biology, climate control, and monitoring data."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "When will tours open?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "We expect to welcome our first guests in mid-to-late 2026. Tours will be limited in size to ensure an intimate, high-quality experience."
+        }
+      }
+    ]
+  }
+  </script>
 </head>
 <body>
   <header class="nav">
@@ -46,6 +78,16 @@
     <section class="card">
       <h1 data-i18n="visits_title">Visit Our Research Farm</h1>
       <p data-i18n="visits_intro">Discover the secrets of vanilla—the world's most labor-intensive spice. Our greenhouse is currently undergoing renovation to create the perfect environment for learning and exploration. Join us for an unforgettable experience combining science, history, and the delicate art of vanilla cultivation.</p>
+    </section>
+
+    <section class="card">
+      <h2 data-i18n="visits_plantations_title">Azores Plantations: Pineapple &amp; Vanilla Orchids</h2>
+      <p data-i18n="visits_plantations_p1">Pineapple plantations are one of the most iconic plantation visits in the Azores. Our project offers a complementary experience: vanilla orchids cultivated in a greenhouse, where visitors can learn about pollination, climate control, and precision agriculture.</p>
+      <ul>
+        <li data-i18n="visits_plantations_li1">If you already visited a pineapple plantation, this is a great “next step” plantation tour.</li>
+        <li data-i18n="visits_plantations_li2">You’ll see orchid flowers, hand‑pollination, and the science behind producing vanilla.</li>
+        <li data-i18n="visits_plantations_li3">You can explore our real monitoring data on the Research Dashboard.</li>
+      </ul>
     </section>
 
     <section class="card">
@@ -74,6 +116,22 @@
       <h2 data-i18n="renovation_title">Coming Soon: Grand Opening</h2>
       <p data-i18n="renovation_desc">Our greenhouse is undergoing careful renovation to meet our vision of an educational and research-focused facility. We are installing advanced climate control, IoT monitoring systems, and designing visitor pathways that balance accessibility with plant care.</p>
       <p data-i18n="renovation_timeline">We expect to welcome our first guests in <strong>mid-to-late 2026</strong>. Tours will be limited in size to ensure an intimate, high-quality experience.</p>
+    </section>
+
+    <section class="card">
+      <h2 data-i18n="visits_faq_title">FAQ</h2>
+      <details>
+        <summary data-i18n="visits_faq_q1">Is vanilla an orchid?</summary>
+        <p data-i18n="visits_faq_a1">Yes. Vanilla comes from orchids (Orchidaceae). The spice is produced from vanilla orchid pods after pollination and curing.</p>
+      </details>
+      <details>
+        <summary data-i18n="visits_faq_q2">How is this different from Azores pineapple plantations?</summary>
+        <p data-i18n="visits_faq_a2">Pineapple plantations are an iconic Azorean tradition. Our visit is a complementary experience focused on vanilla orchids in a controlled greenhouse—pollination biology, climate control, and monitoring data.</p>
+      </details>
+      <details>
+        <summary data-i18n="visits_faq_q3">When will tours open?</summary>
+        <p data-i18n="visits_faq_a3">We expect to welcome our first guests in mid-to-late 2026. Tours will be limited in size to ensure an intimate, high-quality experience.</p>
+      </details>
     </section>
 
     <section class="card">

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <!-- Home page (Vanilla, Orchid & Pineapple Plantation Azores) -->
   <url>
@@ -8,8 +7,6 @@
     <lastmod>2026-01-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
-    <xhtml:link rel="alternate" hreflang="pt" href="https://azoreanvanilla.com/index.html?lang=pt" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://azoreanvanilla.com/" />
   </url>
   
   <!-- About page (Who We Are: Vanilla, Orchid & Pineapple Plantation) -->
@@ -18,8 +15,6 @@
     <lastmod>2026-01-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
-    <xhtml:link rel="alternate" hreflang="pt" href="https://azoreanvanilla.com/about.html?lang=pt" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://azoreanvanilla.com/about.html" />
   </url>
   
   <!-- Statistics/Dashboard page (Vanilla, Orchid & Pineapple Plantation Data) -->
@@ -28,8 +23,6 @@
     <lastmod>2026-01-26</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
-    <xhtml:link rel="alternate" hreflang="pt" href="https://azoreanvanilla.com/statistics.html?lang=pt" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://azoreanvanilla.com/statistics.html" />
   </url>
   
   <!-- Visits/Tourism page (Plantation Tours: Vanilla, Orchid & Pineapple) -->
@@ -38,8 +31,6 @@
     <lastmod>2026-01-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="pt" href="https://azoreanvanilla.com/visits.html?lang=pt" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://azoreanvanilla.com/visits.html" />
   </url>
   
   <!-- Investments page (Invest in Vanilla, Orchid & Pineapple Plantations) -->
@@ -48,8 +39,6 @@
     <lastmod>2026-01-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="pt" href="https://azoreanvanilla.com/investments.html?lang=pt" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://azoreanvanilla.com/investments.html" />
   </url>
   
   <!-- Contact page (Contact for Vanilla, Orchid & Pineapple Plantations) -->
@@ -58,8 +47,6 @@
     <lastmod>2026-01-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="pt" href="https://azoreanvanilla.com/contact.html?lang=pt" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://azoreanvanilla.com/contact.html" />
   </url>
   
   <!-- Terms page -->
@@ -68,8 +55,6 @@
     <lastmod>2026-01-26</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
-    <xhtml:link rel="alternate" hreflang="pt" href="https://azoreanvanilla.com/terms.html?lang=pt" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://azoreanvanilla.com/terms.html" />
   </url>
   
 </urlset>

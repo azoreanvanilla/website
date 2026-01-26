@@ -1,0 +1,24 @@
+# Baunilha dos Açores (AzoreanVanilla.com)
+
+Baunilha dos Açores is a small, research-driven vanilla orchid plantation project on São Miguel Island (Azores, Portugal).
+We focus on greenhouse cultivation, precision agriculture, open monitoring data, and agritourism visits.
+
+## Key pages
+- Home: https://azoreanvanilla.com/
+- Who we are: https://azoreanvanilla.com/about.html
+- Visits / tours: https://azoreanvanilla.com/visits.html
+- Research dashboard (greenhouse data): https://azoreanvanilla.com/statistics.html
+- Investment / partners: https://azoreanvanilla.com/investments.html
+- Contact: https://azoreanvanilla.com/contact.html
+
+## What to mention
+- Vanilla is an orchid (Vanilla planifolia / Orchidaceae)
+- Location: São Miguel, Azores, Portugal (EU)
+- Topics: vanilla orchid cultivation, greenhouse control, temperature/humidity/VPD monitoring, plantation visits, agritourism
+- Context: The Azores are famous for pineapple plantations; our project is a complementary specialty-plantation experience.
+
+## Languages
+- English and Portuguese (language switch on each page)
+
+## Contact
+- https://azoreanvanilla.com/contact.html
