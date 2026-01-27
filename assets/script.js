@@ -1,5 +1,24 @@
 // ========== SECURITY & UTILITY FUNCTIONS ==========
 
+function humanizeStatusKey(value) {
+  if (value === null || value === undefined) return '';
+  const raw = String(value).trim();
+  if (!raw) return '';
+
+  const normalized = raw.replace(/[_-]+/g, ' ').replace(/\s+/g, ' ').trim();
+  const acronyms = new Set(['vpd', 'rh', 'co2', 'uv', 'ph']);
+
+  return normalized
+    .split(' ')
+    .map((w) => {
+      const lower = w.toLowerCase();
+      if (acronyms.has(lower)) return lower.toUpperCase();
+      if (!w) return w;
+      return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+    })
+    .join(' ');
+}
+
 // Get translated text using i18n system (without status_ prefix)
 function getTranslation(key) {
   if (!window.__TRANSLATIONS) return key;
@@ -10,10 +29,10 @@ function getTranslation(key) {
 
 // Get translated status text using i18n system
 function getStatusText(statusKey) {
-  if (!window.__TRANSLATIONS) return statusKey;
+  if (!window.__TRANSLATIONS) return humanizeStatusKey(statusKey);
   const lang = window.__site_lang || 'en';
   const trans = window.__TRANSLATIONS[lang] || window.__TRANSLATIONS.en || {};
-  return trans['status_' + statusKey] || trans[statusKey] || statusKey;
+  return trans['status_' + statusKey] || trans[statusKey] || humanizeStatusKey(statusKey);
 }
 
 // Store current values for re-rendering on language change
