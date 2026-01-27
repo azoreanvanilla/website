@@ -239,10 +239,11 @@ const TRANSLATIONS = {
   en: {
     nav_home: 'Home', nav_about: 'Who We Are', nav_visits: 'Visits', nav_invest: 'Investments', nav_stats: 'Statistics', nav_contact: 'Contact',
     logo: 'Baunilha dos Açores',
-    hero_title: 'Baunilha dos Açores — São Miguel',
-    hero_lead: 'Experimentally cultivating uncommon vanilla in greenhouse conditions on São Miguel island.',
+    hero_title: 'Vanilla & Orchid Plantation — São Miguel, Azores',
+    hero_lead: 'Experimentally cultivating vanilla orchids in greenhouse conditions on São Miguel. An experimental vanilla orchid plantation focused on research and education.',
     cta_support: 'Support the Project', cta_visit: 'Plan a Visit',
-    project_title: 'Project', project_desc: 'This project explores whether vanilla can thrive in greenhouse conditions on São Miguel Island. We combine small-scale R&D, sustainable off-grid methods, and agrotourism to build a unique product and visitor experience.',
+    project_title: 'Project', project_desc: 'This project explores whether vanilla can thrive in greenhouse conditions on São Miguel Island. We combine small-scale R&D, sustainable methods, and agritourism to build a unique plantation experience.',
+    browse_prefix: 'Browse', browse_middle: ', our', browse_or: 'or learn how to', browse_support: 'Support', browse_suffix: 'us.',
     gallery_title: 'Gallery',
     footer_copy: '© Baunilha dos Açores — São Miguel',
     // About
@@ -293,10 +294,11 @@ const TRANSLATIONS = {
   pt: {
     nav_home: 'Início', nav_about: 'Quem Somos', nav_visits: 'Visitas', nav_invest: 'Investimentos', nav_stats: 'Estatísticas', nav_contact: 'Contacto',
     logo: 'Baunilha dos Açores',
-    hero_title: 'Baunilha dos Açores — São Miguel',
-    hero_lead: 'Cultivo experimental de baunilha em estufa na Ilha de São Miguel.',
+    hero_title: 'Plantação de Baunilha (Orquídea) — São Miguel, Açores',
+    hero_lead: 'Cultivo experimental de orquídeas de baunilha em estufa em São Miguel. Uma plantação experimental focada em investigação e educação.',
     cta_support: 'Apoie o Projeto', cta_visit: 'Agende uma Visita',
-    project_title: 'Projeto', project_desc: 'Este projeto explora se a baunilha pode prosperar em condições controladas de estufa na Ilha de São Miguel. Combinamos I&D em pequena escala, métodos sustentáveis off-grid e agroturismo para criar um produto único e uma experiência para visitantes.',
+    project_title: 'Projeto', project_desc: 'Este projeto explora se a baunilha pode prosperar em condições controladas de estufa na Ilha de São Miguel. Combinamos I&D em pequena escala, métodos sustentáveis e agro‑turismo para criar uma experiência única de plantação.',
+    browse_prefix: 'Veja', browse_middle: ', as nossas', browse_or: 'ou saiba como', browse_support: 'Apoiar', browse_suffix: 'apoiar.',
     gallery_title: 'Galeria',
     footer_copy: '© Baunilha dos Açores — São Miguel',
     // About
@@ -344,6 +346,20 @@ const TRANSLATIONS = {
   }
 };
 
+// Expose translations for the status/i18n helpers and allow overlay via external JSON.
+// Embedded translations remain the fallback source of truth.
+window.__TRANSLATIONS = window.__TRANSLATIONS || TRANSLATIONS;
+
+function mergeTranslations(base, extra) {
+  if (!extra || typeof extra !== 'object') return base;
+  for (const [lang, dict] of Object.entries(extra)) {
+    if (!dict || typeof dict !== 'object') continue;
+    base[lang] = base[lang] || {};
+    Object.assign(base[lang], dict);
+  }
+  return base;
+}
+
 /* ----------------------------- helpers ----------------------------- */
 const q = selector => document.querySelector(selector);
 const qAll = selector => Array.from(document.querySelectorAll(selector));
@@ -370,7 +386,8 @@ function setTextNodeSafe(el, text){
 
 /* ----------------------------- translations ----------------------------- */
 function translatePage(lang){
-  const map = TRANSLATIONS[lang] || TRANSLATIONS.en;
+  const source = window.__TRANSLATIONS || TRANSLATIONS;
+  const map = source[lang] || source.en || {};
   // no debug logs in production
   qAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
@@ -387,9 +404,44 @@ function translatePage(lang){
     }
   });
   // no debug logs in production
-  qAll('.lang-switch button').forEach(b => b.classList.toggle('active', b.getAttribute('data-lang') === lang));
+  qAll('.lang-switch [data-lang]').forEach(b => b.classList.toggle('active', b.getAttribute('data-lang') === lang));
+  try{
+    if(document && document.documentElement) document.documentElement.lang = lang;
+  }catch(e){}
   window.__site_lang = lang;
   localStorage.setItem('site_lang', lang);
+}
+
+// Allow other parts of the code to re-apply i18n using an already-selected map.
+window.__applyI18n = function applyI18n(map) {
+  if (!map) return;
+  qAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    const value = map[key];
+    if (value !== undefined && value !== null) setTextNodeSafe(el, value);
+  });
+  qAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    const value = map[key];
+    if (value !== undefined && value !== null) {
+      try { el.innerText = value; } catch (e) {}
+    }
+  });
+};
+
+async function loadExternalTranslationsAndApply() {
+  try {
+    const res = await fetch('assets/translations.json', { cache: 'no-cache' });
+    if (!res.ok) return;
+    const extra = await res.json();
+    window.__TRANSLATIONS = window.__TRANSLATIONS || {};
+    mergeTranslations(window.__TRANSLATIONS, extra);
+
+    const current = localStorage.getItem('site_lang') || window.__site_lang || 'en';
+    translatePage(current);
+  } catch (e) {
+    // silent: keep embedded translations as fallback
+  }
 }
 
 /* ----------------------------- UI behaviors ----------------------------- */
@@ -404,13 +456,17 @@ function setupParallax(){
 
 function setupDelegatedHandlers(){
   document.body.addEventListener('click', (e) => {
-    const langBtn = e.target.closest && e.target.closest('.lang-switch button');
+    const langBtn = e.target.closest && e.target.closest('.lang-switch [data-lang]');
     if(langBtn){
+      if (langBtn.tagName && String(langBtn.tagName).toLowerCase() === 'a') {
+        e.preventDefault();
+      }
       const lang = langBtn.getAttribute('data-lang');
       translatePage(lang);
       // ensure terms display is updated even if DOM is modified
       setTimeout(() => translatePage(lang), 80);
       setTimeout(() => translatePage(lang), 240);
+      if(window.__updateStatusesOnLangChange) window.__updateStatusesOnLangChange();
       return;
     }
     const mt = e.target.closest && e.target.closest('.menu-toggle');
@@ -1418,19 +1474,49 @@ document.addEventListener('DOMContentLoaded', () => {
   setupParallax();
   setupDelegatedHandlers();
 
-  // Also attach direct listeners to language buttons for reliability
-  qAll('.lang-switch button').forEach(b => {
+  // Overlay embedded translations with assets/translations.json (if present).
+  // This keeps one "editable" source for recent SEO/content changes.
+  loadExternalTranslationsAndApply();
+
+  // Also attach direct listeners to language toggles for reliability
+  qAll('.lang-switch [data-lang]').forEach(b => {
     b.addEventListener('click', (ev) => {
+      if (b.tagName && String(b.tagName).toLowerCase() === 'a') ev.preventDefault();
       const lang = b.getAttribute('data-lang');
       translatePage(lang);
       // small retries to cover edge cases
       setTimeout(()=> translatePage(lang), 80);
       setTimeout(()=> translatePage(lang), 240);
       updateDynamicDates();
+      if(window.__updateStatusesOnLangChange) window.__updateStatusesOnLangChange();
     });
   });
 
-  const saved = localStorage.getItem('site_lang') || 'en';
+  // Crawlable entrypoint for Portuguese/English without new paths:
+  // /page.html?lang=pt
+  const urlLang = (() => {
+    try{
+      const u = new URL(window.location.href);
+      const l = (u.searchParams.get('lang') || '').toLowerCase();
+      return (l === 'pt' || l === 'en') ? l : null;
+    }catch(e){
+      return null;
+    }
+  })();
+
+  const saved = urlLang || localStorage.getItem('site_lang') || 'en';
+  if (urlLang) {
+    localStorage.setItem('site_lang', urlLang);
+    // Keep canonicals clean (avoid duplicate parameter URLs in the address bar).
+    try{
+      const u = new URL(window.location.href);
+      u.searchParams.delete('lang');
+      const qs = u.searchParams.toString();
+      const clean = u.pathname + (qs ? `?${qs}` : '') + (u.hash || '');
+      window.history.replaceState({}, '', clean);
+    }catch(e){}
+  }
+
   translatePage(saved);
   updateDynamicDates();
 
