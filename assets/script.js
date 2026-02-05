@@ -1478,8 +1478,10 @@ function updateCharts(chartData){
         
         if (!firstDate || !lastDate) return false;
 
-        const timeSpanMs = lastDate.getTime() - firstDate.getTime();
-        if (timeSpanMs <= 0) return false;
+        // Allow charts to render with a single datapoint (or identical timestamps).
+        // If the time span is 0, we fake a minimal span so x-mapping works.
+        let timeSpanMs = lastDate.getTime() - firstDate.getTime();
+        if (timeSpanMs <= 0) timeSpanMs = 1;
 
         // Find actual data range
         let dataMin = Infinity, dataMax = -Infinity;
@@ -1517,6 +1519,16 @@ function updateCharts(chartData){
 
           points.push(`${xClamped.toFixed(1)},${yClamped.toFixed(1)}`);
         });
+
+        // SVG polylines with a single point often render invisibly.
+        // Duplicate the point with a tiny x-offset to show a short segment.
+        if (points.length === 1) {
+          const parts = points[0].split(',');
+          const x0 = Number(parts[0]);
+          const y0 = parts[1];
+          const x1 = Number.isFinite(x0) ? Math.min(this.xMax, x0 + 0.5) : this.xMin + 0.5;
+          points.push(`${x1.toFixed(1)},${y0}`);
+        }
 
         this.polyline.setAttribute('points', points.join(' '));
         return true;
