@@ -92,6 +92,41 @@
           <div class="gauge-status" id="gauge-vpd-status">--</div>
           <div class="gauge-range" id="vpd-target-range"></div>
         </div>
+
+        <!-- MiFlora substrate/light metrics (2 devices) -->
+        <div class="gauge-card">
+          <div class="gauge-label" data-i18n="metric_soil_moisture">Soil Moisture</div>
+          <div class="gauge-value multi">
+            <div class="gauge-subvalues">
+              <div><span class="device-label" data-i18n="device_first">Sensor 1</span>: <span id="live-moisture-first">--</span><span class="unit">%</span></div>
+              <div><span class="device-label" data-i18n="device_second">Sensor 2</span>: <span id="live-moisture-second">--</span><span class="unit">%</span></div>
+            </div>
+          </div>
+          <div class="gauge-status" id="gauge-moisture-status">--</div>
+          <div class="gauge-range" id="moisture-target-range"></div>
+        </div>
+        <div class="gauge-card">
+          <div class="gauge-label" data-i18n="metric_soil_conductivity">Soil Conductivity</div>
+          <div class="gauge-value multi">
+            <div class="gauge-subvalues">
+              <div><span class="device-label" data-i18n="device_first">Sensor 1</span>: <span id="live-cond-first">--</span><span class="unit">µS/cm</span></div>
+              <div><span class="device-label" data-i18n="device_second">Sensor 2</span>: <span id="live-cond-second">--</span><span class="unit">µS/cm</span></div>
+            </div>
+          </div>
+          <div class="gauge-status" id="gauge-cond-status">--</div>
+          <div class="gauge-range" id="cond-target-range"></div>
+        </div>
+        <div class="gauge-card">
+          <div class="gauge-label" data-i18n="metric_illuminance">Illuminance</div>
+          <div class="gauge-value multi">
+            <div class="gauge-subvalues">
+              <div><span class="device-label" data-i18n="device_first">Sensor 1</span>: <span id="live-lux-first">--</span><span class="unit">lux</span></div>
+              <div><span class="device-label" data-i18n="device_second">Sensor 2</span>: <span id="live-lux-second">--</span><span class="unit">lux</span></div>
+            </div>
+          </div>
+          <div class="gauge-status" id="gauge-lux-status">--</div>
+          <div class="gauge-range" id="lux-target-range"></div>
+        </div>
       </div>
     </section>
 
@@ -366,6 +401,146 @@
       </div>
 
       <p class="chart-note" style="margin-top: 20px; text-align: center;">Each metric is displayed on its own properly-scaled axis to show accurate relationships and daily patterns</p>
+
+      <!-- MiFlora CHARTS (2 devices: first/second) -->
+      <div class="chart-container">
+        <h4 style="margin: 20px 0 10px; color: #8e44ad; font-weight: 600;" data-i18n="chart_illuminance_label">Illuminance (lux)</h4>
+        <svg viewBox="0 0 900 250" class="metric-chart">
+          <defs>
+            <linearGradient id="lux-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" style="stop-color:#eadcf5;stop-opacity:0.35" />
+              <stop offset="100%" style="stop-color:#ffffff;stop-opacity:0" />
+            </linearGradient>
+            <clipPath id="lux-chart-clip">
+              <rect x="50" y="20" width="820" height="180"/>
+            </clipPath>
+          </defs>
+
+          <text x="30" y="30" font-size="11" fill="#666" text-anchor="end">30000</text>
+          <text x="30" y="80" font-size="11" fill="#666" text-anchor="end">20000</text>
+          <text x="30" y="130" font-size="11" fill="#666" text-anchor="end">10000</text>
+          <text x="30" y="205" font-size="11" fill="#666" text-anchor="end">0</text>
+
+          <line x1="50" y1="20" x2="50" y2="200" stroke="#999" stroke-width="1.5"/>
+          <line x1="50" y1="200" x2="870" y2="200" stroke="#999" stroke-width="1.5"/>
+
+          <text x="50" y="220" font-size="10" fill="#666" text-anchor="middle">00:00</text>
+          <text x="186.67" y="220" font-size="10" fill="#666" text-anchor="middle">04:00</text>
+          <text x="323.33" y="220" font-size="10" fill="#666" text-anchor="middle">08:00</text>
+          <text x="460" y="220" font-size="10" fill="#666" text-anchor="middle">12:00</text>
+          <text x="596.67" y="220" font-size="10" fill="#666" text-anchor="middle">16:00</text>
+          <text x="733.33" y="220" font-size="10" fill="#666" text-anchor="middle">20:00</text>
+          <text x="870" y="220" font-size="10" fill="#666" text-anchor="middle">24:00</text>
+
+          <line x1="186.67" y1="20" x2="186.67" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
+          <line x1="323.33" y1="20" x2="323.33" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
+          <line x1="460" y1="20" x2="460" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
+          <line x1="596.67" y1="20" x2="596.67" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
+          <line x1="733.33" y1="20" x2="733.33" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
+          <line x1="870" y1="20" x2="870" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
+
+          <rect id="lux-target-band" x="50" y="20" width="820" height="0" fill="url(#lux-grad)" opacity="0.7"/>
+          <text x="55" y="95" font-size="9" fill="#8e44ad" opacity="0.6" font-weight="600" id="chart-lux-label"></text>
+
+          <polyline id="lux-line-first" points=""
+                    fill="none" stroke="#e74c3c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" clip-path="url(#lux-chart-clip)"/>
+          <polyline id="lux-line-second" points=""
+                    fill="none" stroke="#3498db" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" clip-path="url(#lux-chart-clip)"/>
+        </svg>
+      </div>
+
+      <div class="chart-container">
+        <h4 style="margin: 20px 0 10px; color: #16a085; font-weight: 600;" data-i18n="chart_soil_moisture_label">Soil Moisture (%)</h4>
+        <svg viewBox="0 0 900 250" class="metric-chart">
+          <defs>
+            <linearGradient id="moist-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" style="stop-color:#d5f5ee;stop-opacity:0.35" />
+              <stop offset="100%" style="stop-color:#ffffff;stop-opacity:0" />
+            </linearGradient>
+            <clipPath id="moist-chart-clip">
+              <rect x="50" y="20" width="820" height="180"/>
+            </clipPath>
+          </defs>
+
+          <text x="30" y="30" font-size="11" fill="#666" text-anchor="end">60%</text>
+          <text x="30" y="90" font-size="11" fill="#666" text-anchor="end">40%</text>
+          <text x="30" y="150" font-size="11" fill="#666" text-anchor="end">20%</text>
+          <text x="30" y="205" font-size="11" fill="#666" text-anchor="end">0%</text>
+
+          <line x1="50" y1="20" x2="50" y2="200" stroke="#999" stroke-width="1.5"/>
+          <line x1="50" y1="200" x2="870" y2="200" stroke="#999" stroke-width="1.5"/>
+
+          <text x="50" y="220" font-size="10" fill="#666" text-anchor="middle">00:00</text>
+          <text x="186.67" y="220" font-size="10" fill="#666" text-anchor="middle">04:00</text>
+          <text x="323.33" y="220" font-size="10" fill="#666" text-anchor="middle">08:00</text>
+          <text x="460" y="220" font-size="10" fill="#666" text-anchor="middle">12:00</text>
+          <text x="596.67" y="220" font-size="10" fill="#666" text-anchor="middle">16:00</text>
+          <text x="733.33" y="220" font-size="10" fill="#666" text-anchor="middle">20:00</text>
+          <text x="870" y="220" font-size="10" fill="#666" text-anchor="middle">24:00</text>
+
+          <line x1="186.67" y1="20" x2="186.67" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
+          <line x1="323.33" y1="20" x2="323.33" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
+          <line x1="460" y1="20" x2="460" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
+          <line x1="596.67" y1="20" x2="596.67" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
+          <line x1="733.33" y1="20" x2="733.33" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
+          <line x1="870" y1="20" x2="870" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
+
+          <rect id="moisture-target-band" x="50" y="20" width="820" height="0" fill="url(#moist-grad)" opacity="0.7"/>
+          <text x="55" y="95" font-size="9" fill="#16a085" opacity="0.6" font-weight="600" id="chart-moisture-label"></text>
+
+          <polyline id="moisture-line-first" points=""
+                    fill="none" stroke="#e74c3c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" clip-path="url(#moist-chart-clip)"/>
+          <polyline id="moisture-line-second" points=""
+                    fill="none" stroke="#3498db" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" clip-path="url(#moist-chart-clip)"/>
+        </svg>
+      </div>
+
+      <div class="chart-container">
+        <h4 style="margin: 20px 0 10px; color: #d35400; font-weight: 600;" data-i18n="chart_soil_conductivity_label">Soil Conductivity (µS/cm)</h4>
+        <svg viewBox="0 0 900 250" class="metric-chart">
+          <defs>
+            <linearGradient id="cond-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" style="stop-color:#ffe6cc;stop-opacity:0.35" />
+              <stop offset="100%" style="stop-color:#ffffff;stop-opacity:0" />
+            </linearGradient>
+            <clipPath id="cond-chart-clip">
+              <rect x="50" y="20" width="820" height="180"/>
+            </clipPath>
+          </defs>
+
+          <text x="30" y="30" font-size="11" fill="#666" text-anchor="end">2000</text>
+          <text x="30" y="75" font-size="11" fill="#666" text-anchor="end">1500</text>
+          <text x="30" y="120" font-size="11" fill="#666" text-anchor="end">1000</text>
+          <text x="30" y="165" font-size="11" fill="#666" text-anchor="end">500</text>
+          <text x="30" y="205" font-size="11" fill="#666" text-anchor="end">0</text>
+
+          <line x1="50" y1="20" x2="50" y2="200" stroke="#999" stroke-width="1.5"/>
+          <line x1="50" y1="200" x2="870" y2="200" stroke="#999" stroke-width="1.5"/>
+
+          <text x="50" y="220" font-size="10" fill="#666" text-anchor="middle">00:00</text>
+          <text x="186.67" y="220" font-size="10" fill="#666" text-anchor="middle">04:00</text>
+          <text x="323.33" y="220" font-size="10" fill="#666" text-anchor="middle">08:00</text>
+          <text x="460" y="220" font-size="10" fill="#666" text-anchor="middle">12:00</text>
+          <text x="596.67" y="220" font-size="10" fill="#666" text-anchor="middle">16:00</text>
+          <text x="733.33" y="220" font-size="10" fill="#666" text-anchor="middle">20:00</text>
+          <text x="870" y="220" font-size="10" fill="#666" text-anchor="middle">24:00</text>
+
+          <line x1="186.67" y1="20" x2="186.67" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
+          <line x1="323.33" y1="20" x2="323.33" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
+          <line x1="460" y1="20" x2="460" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
+          <line x1="596.67" y1="20" x2="596.67" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
+          <line x1="733.33" y1="20" x2="733.33" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
+          <line x1="870" y1="20" x2="870" y2="200" stroke="#eee" stroke-width="1" stroke-dasharray="2,2"/>
+
+          <rect id="cond-target-band" x="50" y="20" width="820" height="0" fill="url(#cond-grad)" opacity="0.7"/>
+          <text x="55" y="95" font-size="9" fill="#d35400" opacity="0.6" font-weight="600" id="chart-cond-label"></text>
+
+          <polyline id="cond-line-first" points=""
+                    fill="none" stroke="#e74c3c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" clip-path="url(#cond-chart-clip)"/>
+          <polyline id="cond-line-second" points=""
+                    fill="none" stroke="#3498db" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" clip-path="url(#cond-chart-clip)"/>
+        </svg>
+      </div>
       <p class="trend-rhythm" data-i18n="trend_rhythm">This rhythm mirrors the natural day-night cycle that vanilla expects, even though we're controlling every variable. That's the essence of our technology.</p>
     </section>
 
@@ -453,6 +628,63 @@
             <li data-i18n="card_vpd_control_coordination">Temperature-humidity coordination (maintaining ideal VPD even as outdoor conditions swing)</li>
             <li data-i18n="card_vpd_control_monitoring">Active transpiration monitoring (our sensors trigger interventions before stress occurs)</li>
             <li data-i18n="card_vpd_control_seasonal">Seasonal VPD targets (adjusted for different growth phases)</li>
+          </ul>
+        </div>
+
+        <!-- ILLUMINANCE (MiFlora) -->
+        <div class="metric-card">
+          <h3 data-i18n="card_light_title">Illuminance (Light)</h3>
+          <div class="metric-value" id="card-lux-range">--</div>
+          <div class="metric-current">
+            <small data-i18n="current_label">Current:</small>
+            <span class="device-inline"><span data-i18n="device_first">Sensor 1</span>: <span id="card-lux-first">--</span> lux</span>
+            <span class="device-inline"><span data-i18n="device_second">Sensor 2</span>: <span id="card-lux-second">--</span> lux</span>
+          </div>
+
+          <h4 data-i18n="card_light_why_title">Why It Matters</h4>
+          <p data-i18n="card_light_why">Vanilla is a climbing orchid that prefers bright, filtered light (similar to dappled shade). Too little light slows growth; too much can scorch leaves. We track illuminance to understand seasonal light availability and shading strategy.</p>
+
+          <h4 data-i18n="card_light_control_title">What We Control</h4>
+          <ul>
+            <li data-i18n="card_light_control_shade">Shading and greenhouse layout (avoid direct midday burn)</li>
+            <li data-i18n="card_light_control_orientation">Ventilation and orientation (reduce heat + light stress together)</li>
+          </ul>
+        </div>
+
+        <!-- SOIL MOISTURE (MiFlora) -->
+        <div class="metric-card">
+          <h3 data-i18n="card_soil_moisture_title">Soil Moisture</h3>
+          <div class="metric-value" id="card-moisture-range">--</div>
+          <div class="metric-current">
+            <small data-i18n="current_label">Current:</small>
+            <span class="device-inline"><span data-i18n="device_first">Sensor 1</span>: <span id="card-moisture-first">--</span>%</span>
+            <span class="device-inline"><span data-i18n="device_second">Sensor 2</span>: <span id="card-moisture-second">--</span>%</span>
+          </div>
+
+          <h4 data-i18n="card_soil_moisture_why_title">Why It Matters</h4>
+          <p data-i18n="card_soil_moisture_why">Vanilla roots need steady moisture with strong aeration. The MiFlora moisture number is substrate-dependent and needs calibration, but it is still useful for detecting dry-down cycles and irrigation consistency.</p>
+
+          <h4 data-i18n="card_soil_moisture_note_title">Important Note</h4>
+          <p data-i18n="card_soil_moisture_note">Moisture % is not universal across substrates. We treat these ranges as provisional and refine them as we correlate sensor readings with plant response.</p>
+        </div>
+
+        <!-- SOIL CONDUCTIVITY (MiFlora) -->
+        <div class="metric-card">
+          <h3 data-i18n="card_soil_conductivity_title">Soil Conductivity</h3>
+          <div class="metric-value" id="card-cond-range">--</div>
+          <div class="metric-current">
+            <small data-i18n="current_label">Current:</small>
+            <span class="device-inline"><span data-i18n="device_first">Sensor 1</span>: <span id="card-cond-first">--</span> µS/cm</span>
+            <span class="device-inline"><span data-i18n="device_second">Sensor 2</span>: <span id="card-cond-second">--</span> µS/cm</span>
+          </div>
+
+          <h4 data-i18n="card_soil_conductivity_why_title">Why It Matters</h4>
+          <p data-i18n="card_soil_conductivity_why">Conductivity is a proxy for dissolved salts (fertilizer strength). Too low can mean underfeeding; too high can stress orchid roots. Tracking conductivity helps us keep nutrition gentle and consistent.</p>
+
+          <h4 data-i18n="card_soil_conductivity_control_title">What We Control</h4>
+          <ul>
+            <li data-i18n="card_soil_conductivity_control_feed">Fertilizer concentration and frequency</li>
+            <li data-i18n="card_soil_conductivity_control_flush">Flush cycles (prevent salt accumulation)</li>
           </ul>
         </div>
       </div>

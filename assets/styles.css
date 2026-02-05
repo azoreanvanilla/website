@@ -259,9 +259,15 @@ footer .social-links a:has(.fa-telegram) i{color:#0088cc}
 }
 .gauge-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
   gap: 20px;
   margin: 0;
+}
+
+@media (max-width: 1024px) {
+  .gauge-grid {
+    grid-template-columns: repeat(2, minmax(180px, 1fr));
+  }
 }
 .gauge-card {
   background: linear-gradient(135deg, rgba(43, 143, 191, 0.08), rgba(46, 139, 87, 0.08));
@@ -290,6 +296,23 @@ footer .social-links a:has(.fa-telegram) i{color:#0088cc}
   font-weight: 700;
   margin: 12px 0;
   line-height: 1;
+}
+
+.gauge-value.multi {
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.gauge-subvalues {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  line-height: 1.25;
+}
+
+.device-label {
+  font-weight: 700;
+  color: #444;
 }
 .gauge-value .unit {
   font-size: 1.2rem;
@@ -581,6 +604,25 @@ footer .social-links a:has(.fa-telegram) i{color:#0088cc}
   color: var(--stone);
   margin: 16px 0 8px;
   font-weight: 700;
+}
+
+.metric-current {
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin-bottom: 16px;
+  background: rgba(11, 26, 26, 0.02);
+  padding: 8px 10px;
+  border-radius: 6px;
+}
+
+.metric-current small {
+  color: #888;
+}
+
+.device-inline {
+  display: inline-flex;
+  gap: 6px;
+  white-space: nowrap;
 }
 .metric-card p {
   color: var(--muted);
