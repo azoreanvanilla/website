@@ -1,0 +1,3 @@
+temperature_c,illuminance_lux,moisture_pct,conductivity_us_cm,device
+21.5,1564,8,23,first
+19.0,4249,15,29,second
