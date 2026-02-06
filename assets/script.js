@@ -351,7 +351,7 @@ function updateMiFloraChartTargets(policy) {
     bandId: 'cond-target-band',
     labelId: 'chart-cond-label',
     axisMin: 0,
-    axisMax: 2000,
+    axisMax: 1000,
     targetMin: policy.soil_conductivity_min,
     targetMax: policy.soil_conductivity_max,
     labelText: `${policy.soil_conductivity_min}–${policy.soil_conductivity_max} µS/cm`
@@ -1537,10 +1537,10 @@ function updateCharts(chartData){
 
   // Temperature chart
   if (tempPolyGH && chartData.greenhouse) {
-    new ChartRenderer(tempPolyGH, 'temp', 14, 32).render(chartData.greenhouse);
+    new ChartRenderer(tempPolyGH, 'temp', 5, 32).render(chartData.greenhouse);
   }
   if (tempPolyOut && chartData.outdoor) {
-    new ChartRenderer(tempPolyOut, 'temp', 14, 32).render(chartData.outdoor);
+    new ChartRenderer(tempPolyOut, 'temp', 5, 32).render(chartData.outdoor);
   }
 
   // Humidity chart
@@ -1578,8 +1578,8 @@ function updateCharts(chartData){
     if(luxSecond) new ChartRenderer(luxSecond, 'lux', 0, 30000).render(filterMetric(mfSecond, 'lux'));
     if(moistureFirst) new ChartRenderer(moistureFirst, 'moisture', 0, 60).render(filterMetric(mfFirst, 'moisture'));
     if(moistureSecond) new ChartRenderer(moistureSecond, 'moisture', 0, 60).render(filterMetric(mfSecond, 'moisture'));
-    if(condFirst) new ChartRenderer(condFirst, 'cond', 0, 2000).render(filterMetric(mfFirst, 'cond'));
-    if(condSecond) new ChartRenderer(condSecond, 'cond', 0, 2000).render(filterMetric(mfSecond, 'cond'));
+    if(condFirst) new ChartRenderer(condFirst, 'cond', 0, 1000).render(filterMetric(mfFirst, 'cond'));
+    if(condSecond) new ChartRenderer(condSecond, 'cond', 0, 1000).render(filterMetric(mfSecond, 'cond'));
   }
 
   // Update time labels dynamically based on actual data timestamps (use greenhouse data for timing)
