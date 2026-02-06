@@ -1,0 +1,1 @@
+{"timestamp": "2026-02-06T14:00:00.217371-01:00", "devices": {"first": {"temperature_c": 18.7, "illuminance_lux": 1264, "moisture_pct": 8, "conductivity_us_cm": 21}, "second": {"temperature_c": 18.1, "illuminance_lux": 3111, "moisture_pct": 16, "conductivity_us_cm": 28}}}
