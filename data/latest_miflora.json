@@ -1,1 +1,1 @@
-{"timestamp": "2026-02-08T21:00:00.253644-01:00", "devices": {"first": {"temperature_c": 20.0, "illuminance_lux": 103, "moisture_pct": 56, "conductivity_us_cm": 786}, "second": {"temperature_c": 19.9, "illuminance_lux": 80, "moisture_pct": 46, "conductivity_us_cm": 275}}}
+{"timestamp": "2026-02-08T22:00:00.307324-01:00", "devices": {"first": {"temperature_c": 19.9, "illuminance_lux": 84, "moisture_pct": 56, "conductivity_us_cm": 783}, "second": {"temperature_c": 19.7, "illuminance_lux": 103, "moisture_pct": 46, "conductivity_us_cm": 271}}}
