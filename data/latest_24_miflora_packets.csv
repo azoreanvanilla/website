@@ -1,7 +1,4 @@
 timestamp,device,temperature_c,illuminance_lux,moisture_pct,conductivity_us_cm
-2026-03-09 09:14:31,second,19.9,26741,21,102
-2026-03-09 09:33:56,second,21.7,21396,22,100
-2026-03-09 09:37:14,first,20.0,4165,15,15
 2026-03-09 10:00:34,first,29.5,4185,16,13
 2026-03-09 10:05:19,first,27.1,4212,17,15
 2026-03-09 10:05:21,second,26.2,23796,23,91
@@ -84,3 +81,5 @@ timestamp,device,temperature_c,illuminance_lux,moisture_pct,conductivity_us_cm
 2026-03-10 07:49:33,first,19.6,365,14,18
 2026-03-10 07:53:40,first,19.0,651,14,18
 2026-03-10 07:57:48,second,18.4,3114,22,106
+2026-03-10 08:41:52,first,19.8,1672,14,17
+2026-03-10 08:42:31,second,19.4,4562,22,106
