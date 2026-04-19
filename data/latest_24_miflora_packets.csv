@@ -1,7 +1,4 @@
 timestamp,device,temperature_c,illuminance_lux,moisture_pct,conductivity_us_cm
-2026-04-18 00:13:42,second,16.7,101,15,230
-2026-04-18 00:34:54,first,16.8,103,11,272
-2026-04-18 00:35:02,second,16.9,126,15,229
 2026-04-18 01:08:10,first,16.7,75,11,273
 2026-04-18 01:28:01,first,16.8,75,11,269
 2026-04-18 01:29:09,second,16.8,75,15,226
